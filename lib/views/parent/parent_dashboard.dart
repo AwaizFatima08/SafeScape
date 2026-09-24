@@ -23,7 +23,7 @@ class ParentDashboard extends ConsumerWidget {
       length: 5,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Grown-ups area'),
+          title: const Text('Grown-ups'),
           actions: [
             if (store.data.children.length > 1)
               Padding(

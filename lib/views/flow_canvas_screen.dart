@@ -119,15 +119,17 @@ class _FlowCanvasScreenState extends ConsumerState<FlowCanvasScreen>
         palette = k;
       }
     });
-    _store.logSession(SensorySession(
-      id: newId('sess'),
-      childId: _child.id,
-      mode: 'flow_canvas',
-      start: _started,
-      durationSeconds: secs,
-      palette: palette,
-      touchRhythm: touchRhythmLabel(_touches, secs),
-    ));
+    _store.logSession(
+      SensorySession(
+        id: newId('sess'),
+        childId: _child.id,
+        mode: 'flow_canvas',
+        start: _started,
+        durationSeconds: secs,
+        palette: palette,
+        touchRhythm: touchRhythmLabel(_touches, secs),
+      ),
+    );
   }
 
   void _down(PointerDownEvent e) {
@@ -179,41 +181,46 @@ class _FlowCanvasScreenState extends ConsumerState<FlowCanvasScreen>
               child: Row(children: const [HomeButton(), Spacer(), MuteButton()]),
             ),
             Expanded(
-              child: LayoutBuilder(builder: (context, c) {
-                sim.resize(Size(c.maxWidth, c.maxHeight));
-                return Semantics(
-                  label: 'Calming canvas. Touch and drag anywhere to make gentle waves.',
-                  child: Listener(
-                    key: const ValueKey('flow_canvas'),
-                    behavior: HitTestBehavior.opaque,
-                    onPointerDown: _down,
-                    onPointerMove: _move,
-                    onPointerUp: _up,
-                    onPointerCancel: _up,
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: RepaintBoundary(
-                            child: CustomPaint(painter: FlowPainter(sim, tones, _frame)),
-                          ),
-                        ),
-                        if (s.breathingRing)
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  sim.resize(Size(c.maxWidth, c.maxHeight));
+                  return Semantics(
+                    label: 'Calming canvas. Touch and drag anywhere to make gentle waves.',
+                    child: Listener(
+                      key: const ValueKey('flow_canvas'),
+                      behavior: HitTestBehavior.opaque,
+                      onPointerDown: _down,
+                      onPointerMove: _move,
+                      onPointerUp: _up,
+                      onPointerCancel: _up,
+                      child: Stack(
+                        children: [
                           Positioned.fill(
-                            child: IgnorePointer(
-                              child: ValueListenableBuilder<int>(
-                                valueListenable: _frame,
-                                builder: (context, _, _) {
-                                  final (b, inhale) = FlowSim.breathAt(_clock);
-                                  return _BreathingGuide(breath: b, inhale: inhale, color: tones[0], calm: s.lowMotion);
-                                },
+                            child: RepaintBoundary(child: CustomPaint(painter: FlowPainter(sim, tones, _frame))),
+                          ),
+                          if (s.breathingRing)
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                child: ValueListenableBuilder<int>(
+                                  valueListenable: _frame,
+                                  builder: (context, _, _) {
+                                    final (b, inhale) = FlowSim.breathAt(_clock);
+                                    return _BreathingGuide(
+                                      breath: b,
+                                      inhale: inhale,
+                                      color: tones[0],
+                                      calm: s.lowMotion,
+                                    );
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ),
             _BottomBar(
               palette: s.palette,
@@ -285,34 +292,38 @@ class _BreathingGuide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, c) {
-      final base = min(c.maxWidth, c.maxHeight) * 0.42;
-      final d = base * (0.62 + 0.38 * breath);
-      return Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: d,
-            height: d,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.06 + 0.05 * breath),
-              border: Border.all(color: color.withValues(alpha: 0.45), width: 3),
+    return LayoutBuilder(
+      builder: (context, c) {
+        final base = min(c.maxWidth, c.maxHeight) * 0.42;
+        final d = base * (0.62 + 0.38 * breath);
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: d,
+              height: d,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.06 + 0.05 * breath),
+                border: Border.all(color: color.withValues(alpha: 0.45), width: 3),
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 8,
-            child: Column(
-              children: [
-                Sammy(size: 96, breath: breath, animate: !calm, mood: SammyMood.idle),
-                Text(inhale ? 'Breathe in' : 'Breathe out',
-                    style: TextStyle(fontSize: 18, color: SC.text.withValues(alpha: 0.75))),
-              ],
+            Positioned(
+              bottom: 8,
+              child: Column(
+                children: [
+                  Sammy(size: 96, breath: breath, animate: !calm, mood: SammyMood.idle),
+                  Text(
+                    inhale ? 'Breathe in' : 'Breathe out',
+                    style: TextStyle(fontSize: 18, color: SC.text.withValues(alpha: 0.75)),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -323,67 +334,86 @@ class _BottomBar extends StatelessWidget {
   final VoidCallback onSound;
   final VoidCallback onReset;
 
-  const _BottomBar({required this.palette, required this.soundOn, required this.onPalette, required this.onSound, required this.onReset});
+  const _BottomBar({
+    required this.palette,
+    required this.soundOn,
+    required this.onPalette,
+    required this.onSound,
+    required this.onReset,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final sound = ChunkyIconButton(
+      key: const ValueKey('canvas_sound'),
+      icon: soundOn ? Icons.music_note_rounded : Icons.music_off_rounded,
+      label: soundOn ? 'Soft ambient hum playing' : 'Ambient hum off',
+      color: soundOn ? SC.mint : SC.textDim,
+      onTap: onSound,
+    );
+    final reset = ChunkyIconButton(
+      key: const ValueKey('canvas_reset'),
+      icon: Icons.refresh_rounded,
+      label: 'Reset canvas',
+      onTap: onReset,
+    );
+    final chips = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [for (final p in palettes) _chip(p)],
+    );
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 12),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(color: SC.slate2, borderRadius: BorderRadius.circular(kRadius)),
-      child: Row(
-        children: [
-          ChunkyIconButton(
-            key: const ValueKey('canvas_sound'),
-            icon: soundOn ? Icons.music_note_rounded : Icons.music_off_rounded,
-            label: soundOn ? 'Soft ambient hum playing' : 'Ambient hum off',
-            color: soundOn ? SC.mint : SC.textDim,
-            onTap: onSound,
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      child: LayoutBuilder(
+        builder: (context, c) {
+          // 6 x 72 dp targets need ~450 dp; narrower phones get two rows.
+          if (c.maxWidth >= 6 * kTouch + 12) {
+            return Row(
               children: [
-                for (final p in palettes)
-                  Flexible(
-                    child: Semantics(
-                      button: true,
-                      selected: p == palette,
-                      label: '${paletteNames[p]} colours',
-                      child: InkWell(
-                        key: ValueKey('palette_$p'),
-                        customBorder: const CircleBorder(),
-                        onTap: () => onPalette(p),
-                        child: SizedBox(
-                          width: kTouch,
-                          height: kTouch,
-                          child: Center(
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 400),
-                              width: p == palette ? 44 : 34,
-                              height: p == palette ? 44 : 34,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: SC.palette(p),
-                                border: Border.all(color: p == palette ? SC.text : Colors.transparent, width: 3),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                sound,
+                Expanded(child: Center(child: chips)),
+                reset,
               ],
-            ),
-          ),
-          ChunkyIconButton(
-            key: const ValueKey('canvas_reset'),
-            icon: Icons.refresh_rounded,
-            label: 'Reset canvas',
-            onTap: onReset,
-          ),
-        ],
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              chips,
+              Row(children: [sound, const Spacer(), reset]),
+            ],
+          );
+        },
       ),
     );
   }
+
+  Widget _chip(String p) => Semantics(
+    button: true,
+    selected: p == palette,
+    label: '${paletteNames[p]} colours',
+    child: InkWell(
+      key: ValueKey('palette_$p'),
+      customBorder: const CircleBorder(),
+      onTap: () => onPalette(p),
+      child: SizedBox(
+        width: kTouch,
+        height: kTouch,
+        child: Center(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            width: p == palette ? 44 : 34,
+            height: p == palette ? 44 : 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: SC.palette(p),
+              border: Border.all(color: p == palette ? SC.text : Colors.transparent, width: 3),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

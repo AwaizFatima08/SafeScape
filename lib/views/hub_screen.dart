@@ -55,67 +55,71 @@ class HubScreen extends ConsumerWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Sammy(size: 120, animate: !calm),
+                      Sammy(size: MediaQuery.sizeOf(context).width < 400 ? 92 : 120, animate: !calm),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 18),
-                          child: Text('Hi, ${child.alias}!',
-                              key: const ValueKey('hub_greeting'),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            'Hi, ${child.alias}!',
+                            key: const ValueKey('hub_greeting'),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, height: 1.15),
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Expanded(
-                    child: LayoutBuilder(builder: (context, c) {
-                      final wide = c.maxWidth > 560;
-                      final cards = [
-                        _HubCard(
-                          key: const ValueKey('card_canvas'),
-                          title: 'Calming Canvas',
-                          subtitle: 'Touch, drag, and relax with gentle waves.',
-                          icon: Icons.water_rounded,
-                          color: SC.lavender,
-                          onTap: () => open(const FlowCanvasScreen()),
-                        ),
-                        _HubCard(
-                          key: const ValueKey('card_routines'),
-                          title: 'My Visual Routines',
-                          subtitle: 'Step-by-step guides for today\'s activities.',
-                          icon: Icons.view_agenda_rounded,
-                          color: SC.mint,
-                          onTap: () => open(const RoutinesScreen()),
-                        ),
-                        _HubCard(
-                          key: const ValueKey('card_sounds'),
-                          title: 'Soothing Sounds',
-                          subtitle: 'Listen to warm rain and ambient hums.',
-                          icon: Icons.graphic_eq_rounded,
-                          color: SC.blue,
-                          onTap: () => open(const SoundsScreen()),
-                        ),
-                        _HubCard(
-                          key: const ValueKey('card_wait'),
-                          title: 'Wait Timer',
-                          subtitle: 'See how long until what comes next.',
-                          icon: Icons.hourglass_bottom_rounded,
-                          color: SC.sand,
-                          onTap: () => open(const WaitTimerScreen()),
-                        ),
-                      ];
-                      return GridView.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: wide ? 1.35 : (c.maxWidth / 2) / ((c.maxHeight - 14) / 2),
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: cards,
-                      );
-                    }),
+                    child: LayoutBuilder(
+                      builder: (context, c) {
+                        final wide = c.maxWidth > 560;
+                        final cards = [
+                          _HubCard(
+                            key: const ValueKey('card_canvas'),
+                            title: 'Calming Canvas',
+                            subtitle: 'Touch, drag, and relax with gentle waves.',
+                            icon: Icons.water_rounded,
+                            color: SC.lavender,
+                            onTap: () => open(const FlowCanvasScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_routines'),
+                            title: 'My Visual Routines',
+                            subtitle: 'Step-by-step guides for today\'s activities.',
+                            icon: Icons.view_agenda_rounded,
+                            color: SC.mint,
+                            onTap: () => open(const RoutinesScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_sounds'),
+                            title: 'Soothing Sounds',
+                            subtitle: 'Listen to warm rain and ambient hums.',
+                            icon: Icons.graphic_eq_rounded,
+                            color: SC.blue,
+                            onTap: () => open(const SoundsScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_wait'),
+                            title: 'Wait Timer',
+                            subtitle: 'See how long until what comes next.',
+                            icon: Icons.hourglass_bottom_rounded,
+                            color: SC.sand,
+                            onTap: () => open(const WaitTimerScreen()),
+                          ),
+                        ];
+                        return GridView.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: wide ? 1.35 : (c.maxWidth / 2) / ((c.maxHeight - 14) / 2),
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: cards,
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -134,7 +138,14 @@ class _HubCard extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _HubCard({super.key, required this.title, required this.subtitle, required this.icon, required this.color, required this.onTap});
+  const _HubCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -160,29 +171,68 @@ class _HubCard extends StatelessWidget {
                 colors: [color.withValues(alpha: 0.16), SC.slate2],
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.22), borderRadius: BorderRadius.circular(18)),
-                  child: Icon(icon, color: color, size: 34),
-                ),
-                const Spacer(),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 4),
-                Flexible(
-                  child: Text(subtitle,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, color: SC.textDim, height: 1.25)),
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, c) {
+                // Show as many subtitle lines as truly fit (large system text
+                // on small phones would otherwise clip it mid-line).
+                final scaler = MediaQuery.textScalerOf(context);
+                // Shrink the title just enough that its longest word fits:
+                // a word must never break in the middle.
+                var size = c.maxWidth < 150 ? 16.0 : 19.0;
+                for (final word in this.title.split(' ')) {
+                  final w = (TextPainter(
+                    text: TextSpan(
+                      text: word,
+                      style: TextStyle(fontFamily: 'Andika', fontSize: size, fontWeight: FontWeight.bold),
+                    ),
+                    textScaler: scaler,
+                    textDirection: TextDirection.ltr,
+                  )..layout()).width;
+                  if (w > c.maxWidth) size = (size * c.maxWidth / w * 0.98).clamp(12.0, size);
+                }
+                final titleStyle = TextStyle(fontSize: size, fontWeight: FontWeight.bold, height: 1.15);
+                const subStyle = TextStyle(fontSize: 14, color: SC.textDim, height: 1.25);
+                final iconSize = c.maxHeight < 170 ? 44.0 : 56.0;
+                final title = TextPainter(
+                  text: TextSpan(
+                    text: this.title,
+                    style: titleStyle.copyWith(fontFamily: 'Andika'),
+                  ),
+                  textScaler: scaler,
+                  maxLines: 3,
+                  textDirection: TextDirection.ltr,
+                )..layout(maxWidth: c.maxWidth);
+                final free = c.maxHeight - iconSize - 10 - title.height - 4;
+                // Show the subtitle only if all of it fits; half a sentence is
+                // worse than none for a young reader (screen readers still get
+                // it through the card's semantics label).
+                final sub = TextPainter(
+                  text: TextSpan(text: subtitle, style: subStyle.copyWith(fontFamily: 'Andika')),
+                  textScaler: scaler,
+                  textDirection: TextDirection.ltr,
+                )..layout(maxWidth: c.maxWidth);
+                final showSubtitle = sub.height <= free;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: iconSize,
+                      height: iconSize,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Icon(icon, color: color, size: iconSize * 0.6),
+                    ),
+                    const Spacer(),
+                    Text(this.title, maxLines: 3, overflow: TextOverflow.ellipsis, style: titleStyle),
+                    if (showSubtitle) ...[
+                      const SizedBox(height: 4),
+                      Text(subtitle, style: subStyle),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ),

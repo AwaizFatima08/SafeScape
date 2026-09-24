@@ -89,25 +89,38 @@ class _RoutinePlayerScreenState extends ConsumerState<RoutinePlayerScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                      child: Row(children: [
-                        const HomeButton(),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(r.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      child: Row(
+                        children: [
+                          const HomeButton(),
+                          const Spacer(),
+                          Container(
+                            key: const ValueKey('progress_pill'),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(color: SC.slate2, borderRadius: BorderRadius.circular(20)),
+                            child: Text(
+                              '${r.doneCount}/${r.steps.length} Done',
+                              style: const TextStyle(fontSize: 16, color: SC.mint, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const MuteButton(),
+                        ],
+                      ),
+                    ),
+                    // The title gets its own line so it's never squeezed by
+                    // the buttons on narrow phones or with large text.
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          r.title,
+                          key: const ValueKey('routine_title_text'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
-                        Container(
-                          key: const ValueKey('progress_pill'),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(color: SC.slate2, borderRadius: BorderRadius.circular(20)),
-                          child: Text('${r.doneCount}/${r.steps.length} Done',
-                              style: const TextStyle(fontSize: 16, color: SC.mint, fontWeight: FontWeight.bold)),
-                        ),
-                        const SizedBox(width: 8),
-                        const MuteButton(),
-                      ]),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -128,32 +141,34 @@ class _RoutinePlayerScreenState extends ConsumerState<RoutinePlayerScreen> {
                     ),
                     if (cur >= 0) _FirstThen(routine: r, current: cur),
                     Expanded(
-                      child: LayoutBuilder(builder: (context, c) {
-                        final cols = c.maxWidth > 600 ? 3 : 2;
-                        return GridView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: cols,
-                            mainAxisSpacing: 14,
-                            crossAxisSpacing: 14,
-                            childAspectRatio: 0.9,
-                          ),
-                          itemCount: r.steps.length,
-                          itemBuilder: (context, i) => _StepCard(
-                            key: ValueKey('step_$i'),
-                            step: r.steps[i],
-                            index: i,
-                            state: r.steps[i].isCompleted
-                                ? _StepState.done
-                                : i == cur
-                                    ? _StepState.current
-                                    : _StepState.upcoming,
-                            calm: calm,
-                            burstSeq: _burstStepId == r.steps[i].id ? _burstSeq : 0,
-                            onTap: () => _tapStep(r, i),
-                          ),
-                        );
-                      }),
+                      child: LayoutBuilder(
+                        builder: (context, c) {
+                          final cols = c.maxWidth > 600 ? 3 : 2;
+                          return GridView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: cols,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: c.maxWidth < 400 ? 0.78 : 0.9,
+                            ),
+                            itemCount: r.steps.length,
+                            itemBuilder: (context, i) => _StepCard(
+                              key: ValueKey('step_$i'),
+                              step: r.steps[i],
+                              index: i,
+                              state: r.steps[i].isCompleted
+                                  ? _StepState.done
+                                  : i == cur
+                                  ? _StepState.current
+                                  : _StepState.upcoming,
+                              calm: calm,
+                              burstSeq: _burstStepId == r.steps[i].id ? _burstSeq : 0,
+                              onTap: () => _tapStep(r, i),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -186,6 +201,7 @@ class _FirstThen extends StatelessWidget {
   Widget build(BuildContext context) {
     final first = routine.steps[current];
     final then = current + 1 < routine.steps.length ? routine.steps[current + 1] : null;
+    final narrow = MediaQuery.sizeOf(context).width < 400;
     Widget half(String label, RoutineStep s, Color c) => Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -194,31 +210,46 @@ class _FirstThen extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: c.withValues(alpha: 0.5), width: 2),
         ),
-        child: Row(children: [
-          StepPicture(iconKey: s.iconKey, photoPath: s.photoPath, size: 44),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(label, style: TextStyle(fontSize: 13, color: c, fontWeight: FontWeight.bold)),
-              Text(s.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15)),
-            ]),
-          ),
-        ]),
+        child: Row(
+          children: [
+            StepPicture(iconKey: s.iconKey, photoPath: s.photoPath, size: narrow ? 32 : 44),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(fontSize: 13, color: c, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    s.title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 15, height: 1.15),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
     return Padding(
       key: const ValueKey('first_then'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(children: [
-        half('FIRST', first, SC.lavender),
-        if (then != null) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Icon(Icons.arrow_forward_rounded, color: SC.textDim),
-          ),
-          half('THEN', then, SC.mint),
+      child: Row(
+        children: [
+          half('FIRST', first, SC.lavender),
+          if (then != null) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(Icons.arrow_forward_rounded, color: SC.textDim),
+            ),
+            half('THEN', then, SC.mint),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }
@@ -233,7 +264,15 @@ class _StepCard extends StatefulWidget {
   final int burstSeq;
   final VoidCallback onTap;
 
-  const _StepCard({super.key, required this.step, required this.index, required this.state, required this.calm, required this.burstSeq, required this.onTap});
+  const _StepCard({
+    super.key,
+    required this.step,
+    required this.index,
+    required this.state,
+    required this.calm,
+    required this.burstSeq,
+    required this.onTap,
+  });
 
   @override
   State<_StepCard> createState() => _StepCardState();
@@ -275,6 +314,7 @@ class _StepCardState extends State<_StepCard> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final s = widget.step;
+    final narrow = MediaQuery.sizeOf(context).width < 400;
     final (label, color) = switch (widget.state) {
       _StepState.done => ('DONE', SC.mint),
       _StepState.current => ('NOW', SC.lavender),
@@ -310,32 +350,49 @@ class _StepCardState extends State<_StepCard> with TickerProviderStateMixin {
                             width: widget.state == _StepState.current ? 4 : 2,
                           ),
                           boxShadow: glow > 0
-                              ? [BoxShadow(color: SC.lavender.withValues(alpha: glow * 0.5), blurRadius: 18, spreadRadius: 1)]
+                              ? [
+                                  BoxShadow(
+                                    color: SC.lavender.withValues(alpha: glow * 0.5),
+                                    blurRadius: 18,
+                                    spreadRadius: 1,
+                                  ),
+                                ]
                               : null,
                         ),
                         child: Column(
                           children: [
-                            Row(children: [
-                              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color)),
-                              const Spacer(),
-                              if (widget.state == _StepState.done)
-                                const Icon(Icons.check_circle_rounded, color: SC.mint, size: 26)
-                              else if (s.story.isNotEmpty)
-                                const Icon(Icons.record_voice_over_rounded, color: SC.textDim, size: 20),
-                            ]),
+                            Row(
+                              children: [
+                                Text(
+                                  label,
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color),
+                                ),
+                                const Spacer(),
+                                if (widget.state == _StepState.done)
+                                  const Icon(Icons.check_circle_rounded, color: SC.mint, size: 26)
+                                else if (s.story.isNotEmpty)
+                                  const Icon(Icons.record_voice_over_rounded, color: SC.textDim, size: 20),
+                              ],
+                            ),
                             Expanded(
                               child: Center(
                                 child: Opacity(
                                   opacity: widget.state == _StepState.done ? 0.55 : 1,
-                                  child: StepPicture(iconKey: s.iconKey, photoPath: s.photoPath, size: 88),
+                                  child: StepPicture(
+                                    iconKey: s.iconKey,
+                                    photoPath: s.photoPath,
+                                    size: narrow ? 64 : 88,
+                                  ),
                                 ),
                               ),
                             ),
-                            Text('${widget.index + 1}. ${s.title}',
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                            Text(
+                              '${widget.index + 1}. ${s.title}',
+                              textAlign: TextAlign.center,
+                              maxLines: narrow ? 4 : 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: narrow ? 15 : 17, fontWeight: FontWeight.bold, height: 1.15),
+                            ),
                           ],
                         ),
                       ),
@@ -344,7 +401,9 @@ class _StepCardState extends State<_StepCard> with TickerProviderStateMixin {
                 ),
               ),
               if (_burst.isAnimating)
-                Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _BurstPainter(_burst.value)))),
+                Positioned.fill(
+                  child: IgnorePointer(child: CustomPaint(painter: _BurstPainter(_burst.value))),
+                ),
             ],
           );
         },
@@ -411,10 +470,16 @@ class _Celebration extends StatelessWidget {
             children: [
               Sammy(size: 200, mood: SammyMood.celebrating, animate: !calm),
               const SizedBox(height: 12),
-              const Text('All done!', style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: SC.sand)),
+              const Text(
+                'All done!',
+                style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: SC.sand),
+              ),
               const SizedBox(height: 6),
-              Text(alias.isEmpty ? 'Great job!' : 'Great job, $alias!',
-                  textAlign: TextAlign.center, style: const TextStyle(fontSize: 22)),
+              Text(
+                alias.isEmpty ? 'Great job!' : 'Great job, $alias!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 22),
+              ),
               const SizedBox(height: 28),
               Wrap(
                 spacing: 14,

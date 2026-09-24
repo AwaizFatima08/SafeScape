@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:safescape/models/models.dart';
 
@@ -25,7 +26,13 @@ Future<void> tapKey(WidgetTester t, String key) async {
     await t.scrollUntilVisible(f, 250,
         scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last);
   }
-  await t.ensureVisible(f);
+  // Only scroll when the target is off-screen: ensureVisible also moves
+  // horizontal ancestors (e.g. a TabBarView) and can switch tabs.
+  final r = t.getRect(f);
+  final screen = Offset.zero & t.view.physicalSize / t.view.devicePixelRatio;
+  if (!screen.contains(r.topLeft) || !screen.contains(r.bottomRight - const Offset(1, 1))) {
+    await t.ensureVisible(f);
+  }
   // Let any running scroll (e.g. a text field revealing itself) finish:
   // scrollables ignore taps mid-scroll.
   await t.pump(const Duration(milliseconds: 400));
@@ -95,7 +102,7 @@ void main() {
     await t.tap(find.text('Cancel'));
     await settle(t);
     await passGate(t);
-    expect(find.text('Grown-ups area'), findsOneWidget);
+    expect(find.text('Grown-ups'), findsOneWidget);
     expect(find.text('Calm & Focus Horizon'), findsOneWidget);
     for (final tab in ['tab_sensory', 'tab_routines', 'tab_family', 'tab_account']) {
       await tapKey(t, tab);
@@ -193,6 +200,44 @@ void main() {
     }
   });
 
+  testWidgets('Galaxy A12 with large text (340 dp, x1.3): nothing is truncated', (t) async {
+    t.view.physicalSize = const Size(720, 1600);
+    t.view.devicePixelRatio = 720 / 340;
+    t.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(t.view.reset);
+    addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+    final env = await t.runAsync(() => makeEnv());
+    final child = env!.store.addChild(alias: 'Maya', ageGroup: '5-7');
+    await t.pumpWidget(env.app());
+    await settle(t);
+
+    void noTruncation(String where) {
+      for (final p in t.allRenderObjects.whereType<RenderParagraph>()) {
+        expect(p.didExceedMaxLines, isFalse, reason: '$where: "${p.text.toPlainText()}" is cut off');
+      }
+      expect(t.takeException(), isNull, reason: where);
+    }
+
+    noTruncation('hub');
+    await tapKey(t, 'card_routines');
+    noTruncation('routines');
+    final doctor = env.store.routinesFor(child.id).firstWhere((r) => r.title == 'Visiting the Doctor');
+    await tapKey(t, 'routine_${doctor.id}');
+    noTruncation('routine player');
+    await tapKey(t, 'home');
+    await tapKey(t, 'card_canvas');
+    noTruncation('canvas');
+    for (final p in ['lavender', 'mint', 'sand', 'blue']) {
+      expect(t.getSize(find.byKey(ValueKey('palette_$p'))).width, greaterThanOrEqualTo(72), reason: p);
+    }
+    await tapKey(t, 'home');
+    await tapKey(t, 'card_sounds');
+    noTruncation('sounds');
+    await tapKey(t, 'home');
+    await tapKey(t, 'card_wait');
+    noTruncation('wait timer');
+  });
+
   testWidgets('flow canvas: multi-touch, palettes and reset', (t) async {
     phone(t);
     final env = await t.runAsync(() => makeEnv());
@@ -262,7 +307,11 @@ void main() {
     await passGate(t);
     await tapKey(t, 'tab_routines');
     await tapKey(t, 'add_routine');
-    await tapKey(t, 'new_blank');
+    // Tap the sheet item directly: auto-scrolling here can move the tab view behind.
+    await t.tap(find.byKey(const ValueKey('new_blank')));
+    for (var i = 0; i < 4; i++) {
+      await t.pump(const Duration(milliseconds: 300));
+      }
     await t.enterText(find.byKey(const ValueKey('routine_title')), 'Swimming');
     await tapKey(t, 'add_step');
     await t.enterText(find.byKey(const ValueKey('step_title')), 'Put on goggles');
