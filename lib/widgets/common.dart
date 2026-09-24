@@ -78,7 +78,7 @@ class HomeButton extends StatelessWidget {
     key: const ValueKey('home'),
     icon: Icons.home_rounded,
     label: 'Back to hub',
-    onTap: () => Navigator.of(context).maybePop(),
+    onTap: () => Navigator.of(context).popUntil((r) => r.isFirst),
   );
 }
 

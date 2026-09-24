@@ -237,6 +237,11 @@ class _AccountTabState extends ConsumerState<AccountTab> {
             subtitle: 'Permanently removes everything.',
             onTap: _delete,
           ),
+          if (cloud.signedIn)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+              child: SelectableText('Account ID: ${cloud.uid}', style: const TextStyle(color: SC.textDim, fontSize: 13)),
+            ),
           const SectionTitle('About'),
           _ActionTile(
             icon: Icons.privacy_tip_rounded,

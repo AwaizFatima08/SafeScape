@@ -81,8 +81,14 @@ class AppStore extends ChangeNotifier {
 
   // ---------- persistence ----------
 
-  void _changed() {
-    notifyListeners();
+  void _changed({bool deferNotify = false}) {
+    if (deferNotify) {
+      // Called from widget dispose() (a screen logging its session as it
+      // closes): listeners can't be notified while the tree is rebuilding.
+      Future(() => notifyListeners());
+    } else {
+      notifyListeners();
+    }
     _saveTimer?.cancel();
     _saveTimer = Timer(const Duration(milliseconds: 250), flush);
   }
@@ -263,7 +269,7 @@ class AppStore extends ChangeNotifier {
       data.sessions.add(s);
     }
     _trimSessions();
-    _changed();
+    _changed(deferNotify: true);
     if (_mirror) cloud.upsertSession(s);
   }
 

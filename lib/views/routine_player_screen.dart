@@ -163,7 +163,7 @@ class _RoutinePlayerScreenState extends ConsumerState<RoutinePlayerScreen> {
               _Celebration(
                 alias: child?.alias ?? '',
                 calm: calm,
-                onHome: () => Navigator.of(context).maybePop(),
+                onHome: () => Navigator.of(context).popUntil((r) => r.isFirst),
                 onAgain: () {
                   store.resetRoutine(r);
                   setState(() => _celebrate = false);
