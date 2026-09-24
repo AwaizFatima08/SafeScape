@@ -203,6 +203,9 @@ void main() {
   testWidgets('Galaxy A12 with large text (340 dp, x1.3): nothing is truncated', (t) async {
     t.view.physicalSize = const Size(720, 1600);
     t.view.devicePixelRatio = 720 / 340;
+    // The A12's status bar (~24 dp) and 3-button navigation bar (~48 dp).
+    t.view.padding = const FakeViewPadding(top: 24 * 720 / 340, bottom: 48 * 720 / 340);
+    t.view.viewPadding = const FakeViewPadding(top: 24 * 720 / 340, bottom: 48 * 720 / 340);
     t.platformDispatcher.textScaleFactorTestValue = 1.3;
     addTearDown(t.view.reset);
     addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
@@ -224,6 +227,9 @@ void main() {
     final doctor = env.store.routinesFor(child.id).firstWhere((r) => r.title == 'Visiting the Doctor');
     await tapKey(t, 'routine_${doctor.id}');
     noTruncation('routine player');
+    await tapKey(t, 'step_0');
+    await tapKey(t, 'step_1');
+    noTruncation('routine player, step 3 current');
     await tapKey(t, 'home');
     await tapKey(t, 'card_canvas');
     noTruncation('canvas');

@@ -176,6 +176,9 @@ class _HubCard extends StatelessWidget {
                 // Show as many subtitle lines as truly fit (large system text
                 // on small phones would otherwise clip it mid-line).
                 final scaler = MediaQuery.textScalerOf(context);
+                // Measure with exactly the style the Text widgets inherit (theme
+                // letter spacing etc.), or the estimate drifts from reality.
+                final base = DefaultTextStyle.of(context).style;
                 // Shrink the title just enough that its longest word fits:
                 // a word must never break in the middle.
                 var size = c.maxWidth < 150 ? 16.0 : 19.0;
@@ -183,7 +186,7 @@ class _HubCard extends StatelessWidget {
                   final w = (TextPainter(
                     text: TextSpan(
                       text: word,
-                      style: TextStyle(fontFamily: 'Andika', fontSize: size, fontWeight: FontWeight.bold),
+                      style: base.merge(TextStyle(fontSize: size, fontWeight: FontWeight.bold)),
                     ),
                     textScaler: scaler,
                     textDirection: TextDirection.ltr,
@@ -194,10 +197,7 @@ class _HubCard extends StatelessWidget {
                 const subStyle = TextStyle(fontSize: 14, color: SC.textDim, height: 1.25);
                 final iconSize = c.maxHeight < 170 ? 44.0 : 56.0;
                 final title = TextPainter(
-                  text: TextSpan(
-                    text: this.title,
-                    style: titleStyle.copyWith(fontFamily: 'Andika'),
-                  ),
+                  text: TextSpan(text: this.title, style: base.merge(titleStyle)),
                   textScaler: scaler,
                   maxLines: 3,
                   textDirection: TextDirection.ltr,
@@ -207,11 +207,11 @@ class _HubCard extends StatelessWidget {
                 // worse than none for a young reader (screen readers still get
                 // it through the card's semantics label).
                 final sub = TextPainter(
-                  text: TextSpan(text: subtitle, style: subStyle.copyWith(fontFamily: 'Andika')),
+                  text: TextSpan(text: subtitle, style: base.merge(subStyle)),
                   textScaler: scaler,
                   textDirection: TextDirection.ltr,
                 )..layout(maxWidth: c.maxWidth);
-                final showSubtitle = sub.height <= free;
+                final showSubtitle = sub.height + 6 <= free; // margin for rounding
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -226,10 +226,7 @@ class _HubCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(this.title, maxLines: 3, overflow: TextOverflow.ellipsis, style: titleStyle),
-                    if (showSubtitle) ...[
-                      const SizedBox(height: 4),
-                      Text(subtitle, style: subStyle),
-                    ],
+                    if (showSubtitle) ...[const SizedBox(height: 4), Text(subtitle, style: subStyle)],
                   ],
                 );
               },

@@ -224,9 +224,9 @@ class _FirstThen extends StatelessWidget {
                   ),
                   Text(
                     s.title,
-                    maxLines: 3,
+                    maxLines: narrow ? 4 : 3,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 15, height: 1.15),
+                    style: TextStyle(fontSize: narrow ? 14 : 15, height: 1.15),
                   ),
                 ],
               ),
