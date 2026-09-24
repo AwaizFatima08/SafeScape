@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "411967485880",
+    "project_id": "safescape-homilabs",
+    "storage_bucket": "safescape-homilabs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411967485880:android:f48a4999f8f260ff1a814d",
+        "android_client_info": {
+          "package_name": "com.homilabs.safescape"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu_QajgrjUE6ivKP_a9NAMVx4_4SM3uhc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
