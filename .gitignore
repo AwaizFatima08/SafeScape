@@ -54,3 +54,4 @@ scripts/backup.log
 scripts/__pycache__/
 .~lock.*#
 android/build/
+.firebase/
