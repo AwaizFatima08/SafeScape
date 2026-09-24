@@ -31,4 +31,4 @@ Calm sensory play (Flow Canvas, Soothing Sounds) and visual routines (step cards
 - Tests: `flutter test` (unit + widget) and `flutter test integration_test/app_flow_test.dart -d <device>`.
 - Release: `flutter build appbundle --release` (signs via `android/key.properties` → `.secrets/safescape-upload.keystore`).
 - Builds need `JAVA_HOME=~/jdks/jdk-21.0.12.1+1`. Another session may stop the shared Gradle daemon mid-build ("stop command received"); just rerun.
-- Emulator AVD `pixel6_api35` (`ANDROID_AVD_HOME=/mnt/storage/projects/android-avd`), start with `-gpu swangle_indirect -cores 4 -memory 3072`. It may already be running for another project.
+- Emulator AVD `safescape_api35` (`ANDROID_AVD_HOME=/mnt/storage/projects/android-avd`), a dedicated AVD (EchoSteps has its own). Start with `-port 5570 -gpu swangle_indirect -cores 3 -memory 3072` when RAM allows: running it next to another session's emulator and Gradle daemon can exhaust the 15 GB.

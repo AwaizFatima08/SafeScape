@@ -219,11 +219,14 @@ class FlowSim {
       p.x += p.vx * dt * m;
       p.y += p.vy * dt * m;
       p.life -= dt / p.lifetime;
-      // Soft walls: drift back in rather than disappearing at the edge.
-      if (p.x < 0) { p.x = 0; p.vx = p.vx.abs() * 0.3; }
-      if (p.x > size.width) { p.x = size.width; p.vx = -p.vx.abs() * 0.3; }
-      if (p.y < 0) { p.y = 0; p.vy = p.vy.abs() * 0.3; }
-      if (p.y > size.height) { p.y = size.height; p.vy = -p.vy.abs() * 0.3; }
+      // Soft walls: a particle that reaches an edge drifts back a little and
+      // fades out, so swipes never pile bright blobs up along the border.
+      var hitWall = false;
+      if (p.x < 0) { p.x = 0; p.vx = p.vx.abs() * 0.3; hitWall = true; }
+      if (p.x > size.width) { p.x = size.width; p.vx = -p.vx.abs() * 0.3; hitWall = true; }
+      if (p.y < 0) { p.y = 0; p.vy = p.vy.abs() * 0.3; hitWall = true; }
+      if (p.y > size.height) { p.y = size.height; p.vy = -p.vy.abs() * 0.3; hitWall = true; }
+      if (hitWall && !p.ambient && p.life > 0.3) p.life = 0.3;
     }
 
     // Ripples widen slowly and fade.

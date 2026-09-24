@@ -51,6 +51,19 @@ void main() {
       }
     });
 
+    test('particles pushed into a wall fade instead of piling up', () {
+      final s = sim();
+      for (var f = 0; f < 120; f++) {
+        s.touchMove(380, 350, 30, 0, 1 / 60); // hard swipes toward the right edge
+        s.step(1 / 60);
+      }
+      for (var f = 0; f < 90; f++) {
+        s.step(1 / 60);
+      }
+      final atWall = s.particles.where((p) => p.life > 0 && !p.ambient && p.x >= 399).length;
+      expect(atWall, lessThan(5));
+    });
+
     test('lower density means fewer particles', () {
       expect(sim(density: 0.2).maxParticles, lessThan(sim(density: 1).maxParticles));
     });
