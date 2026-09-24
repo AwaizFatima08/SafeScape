@@ -173,6 +173,26 @@ void main() {
     expect(env.sound.currentLoop, isNull, reason: 'leaving the screen stops the sound');
   });
 
+  testWidgets('small phone (Galaxy A12 size): the home button never scrolls away', (t) async {
+    t.view.physicalSize = const Size(720, 1600);
+    t.view.devicePixelRatio = 2.0;
+    addTearDown(t.view.reset);
+    final env = await t.runAsync(() => makeEnv());
+    env!.store.addChild(alias: 'A', ageGroup: '5-7');
+    await t.pumpWidget(env.app());
+    await settle(t);
+    for (final card in ['card_sounds', 'card_wait']) {
+      await tapKey(t, card);
+      await t.drag(find.byType(ListView).first, const Offset(0, -2000));
+      await settle(t, 600);
+      final home = find.byKey(const ValueKey('home'));
+      expect(home.hitTestable(), findsOneWidget, reason: card);
+      await t.tap(home);
+      await settle(t);
+      expect(find.byKey(const ValueKey('hub_greeting')), findsOneWidget);
+    }
+  });
+
   testWidgets('flow canvas: multi-touch, palettes and reset', (t) async {
     phone(t);
     final env = await t.runAsync(() => makeEnv());

@@ -137,91 +137,104 @@ class _SoundsScreenState extends ConsumerState<SoundsScreen> with WidgetsBinding
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
               children: [
-                Row(
-                  children: const [
-                    HomeButton(),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text('Soothing Sounds', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    ),
-                    MuteButton(),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 14,
-                  crossAxisSpacing: 14,
-                  childAspectRatio: 1.1,
-                  children: [
-                    for (final n in soundNames)
-                      _SoundCard(
-                        key: ValueKey('sound_$n'),
-                        title: soundTitles[n]!,
-                        icon: _icons[n]!,
-                        color: _colors[n]!,
-                        playing: _playing == n,
-                        onTap: () => _toggle(n),
+                // Pinned: the way home is always visible, even on small phones.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Row(
+                    children: const [
+                      HomeButton(),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text('Soothing Sounds', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                       ),
-                  ],
+                      MuteButton(),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 22),
-                const Text('Volume', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    const Icon(Icons.volume_down_rounded, color: SC.textDim),
-                    Expanded(
-                      child: SliderTheme(
-                        data: SliderTheme.of(
-                          context,
-                        ).copyWith(trackHeight: 14, thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 18)),
-                        child: Slider(
-                          key: const ValueKey('volume'),
-                          value: vol,
-                          onChanged: (v) {
-                            store.updateSettings((s) => s.masterVolume = v);
-                            _sound.configure(muted: store.settings.audioMuted, volume: v);
-                          },
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    children: [
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 14,
+                        crossAxisSpacing: 14,
+                        childAspectRatio: 1.1,
+                        children: [
+                          for (final n in soundNames)
+                            _SoundCard(
+                              key: ValueKey('sound_$n'),
+                              title: soundTitles[n]!,
+                              icon: _icons[n]!,
+                              color: _colors[n]!,
+                              playing: _playing == n,
+                              onTap: () => _toggle(n),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      const Text('Volume', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          const Icon(Icons.volume_down_rounded, color: SC.textDim),
+                          Expanded(
+                            child: SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 14,
+                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 18),
+                              ),
+                              child: Slider(
+                                key: const ValueKey('volume'),
+                                value: vol,
+                                onChanged: (v) {
+                                  store.updateSettings((s) => s.masterVolume = v);
+                                  _sound.configure(muted: store.settings.audioMuted, volume: v);
+                                },
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.volume_up_rounded, color: SC.textDim),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Text('Slowly fade out after', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          for (final m in const [0, 10, 20, 30])
+                            ChoiceChip(
+                              key: ValueKey('fade_$m'),
+                              label: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                                child: Text(m == 0 ? 'Keep playing' : '$m min', style: const TextStyle(fontSize: 17)),
+                              ),
+                              selected: _fadeMinutes == m,
+                              selectedColor: SC.mint.withValues(alpha: 0.3),
+                              onSelected: (_) {
+                                setState(() => _fadeMinutes = m);
+                                _fadeLevel = 1;
+                                _sound.setLoopLevel(1);
+                                _startFadeTimer();
+                              },
+                            ),
+                        ],
+                      ),
+                      if (store.activeChild?.sensory.muteHighPitch ?? false) ...[
+                        const SizedBox(height: 18),
+                        const Text(
+                          'High pitches are filtered out for a softer sound.',
+                          style: TextStyle(color: SC.textDim),
                         ),
-                      ),
-                    ),
-                    const Icon(Icons.volume_up_rounded, color: SC.textDim),
-                  ],
+                      ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                const Text('Slowly fade out after', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    for (final m in const [0, 10, 20, 30])
-                      ChoiceChip(
-                        key: ValueKey('fade_$m'),
-                        label: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                          child: Text(m == 0 ? 'Keep playing' : '$m min', style: const TextStyle(fontSize: 17)),
-                        ),
-                        selected: _fadeMinutes == m,
-                        selectedColor: SC.mint.withValues(alpha: 0.3),
-                        onSelected: (_) {
-                          setState(() => _fadeMinutes = m);
-                          _fadeLevel = 1;
-                          _sound.setLoopLevel(1);
-                          _startFadeTimer();
-                        },
-                      ),
-                  ],
-                ),
-                if (store.activeChild?.sensory.muteHighPitch ?? false) ...[
-                  const SizedBox(height: 18),
-                  const Text('High pitches are filtered out for a softer sound.', style: TextStyle(color: SC.textDim)),
-                ],
               ],
             ),
           ),

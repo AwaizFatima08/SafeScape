@@ -9,7 +9,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safescape/app.dart';
 import 'package:safescape/main.dart' as app;
+import 'package:safescape/state/providers.dart';
 
 Future<void> wait(WidgetTester t, int ms) async {
   final end = DateTime.now().add(Duration(milliseconds: ms));
@@ -36,11 +39,16 @@ void main() {
 
   testWidgets('a full visit, mirrored to the cloud', (t) async {
     await app.main();
-    await wait(t, 3000);
+    // Slow phones (e.g. Galaxy A12) take a while to start Firebase and draw.
+    final alias = find.byKey(const ValueKey('alias_field'));
+    final hub = find.byKey(const ValueKey('hub_greeting'));
+    for (var i = 0; i < 60 && alias.evaluate().isEmpty && hub.evaluate().isEmpty; i++) {
+      await wait(t, 500);
+    }
+    await wait(t, 1000);
 
     // Onboarding (fresh install) or straight to the hub (re-run).
-    if (find.byKey(const ValueKey('enter_button')).evaluate().isNotEmpty ||
-        find.text('Welcome to SafeScape').evaluate().isNotEmpty) {
+    if (alias.evaluate().isNotEmpty) {
       await t.enterText(find.byKey(const ValueKey('alias_field')), 'Tester');
       await t.testTextInput.receiveAction(TextInputAction.done);
       FocusManager.instance.primaryFocus?.unfocus();
@@ -103,8 +111,13 @@ void main() {
     }
     await wait(t, 1500);
     expect(find.text('Calm & Focus Horizon'), findsOneWidget);
-    expect(find.textContaining('Flow Canvas (Lavender)'), findsWidgets);
-    expect(find.text('Soft Rain'), findsWidgets);
+    // What the dashboard summarises: the sessions the app recorded.
+    final store = ProviderScope.containerOf(t.element(find.byType(SafeScapeApp))).read(storeProvider);
+    final recorded = store.data.sessions;
+    expect(recorded.any((x) => x.mode == 'flow_canvas' && x.palette == 'lavender' && x.durationSeconds >= 10), isTrue,
+        reason: 'the palette used longest is recorded');
+    expect(recorded.any((x) => x.mode == 'sounds' && x.sound == 'rain' && x.durationSeconds >= 10), isTrue);
+    expect(recorded.any((x) => x.mode == 'routine' && x.stepsDone == x.stepsTotal && x.stepsTotal > 0), isTrue);
     for (final tab in ['tab_sensory', 'tab_routines', 'tab_family', 'tab_account']) {
       await tapKey(t, tab);
     }

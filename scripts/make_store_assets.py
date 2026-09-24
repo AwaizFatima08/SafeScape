@@ -57,5 +57,24 @@ def feature_graphic():
     print("feature graphic written")
 
 
+def fit_screenshots():
+    """Play rejects screenshots whose long side is more than twice the short
+    side. Modern phones are ~2.22:1, so pad the sides with the app's slate
+    colour to exactly 2:1 (nothing is cropped). Writes to screenshots-play/."""
+    src_root = ROOT / "store-assets/screenshots"
+    for src in sorted(src_root.rglob("*.png")):
+        im = Image.open(src).convert("RGB")
+        w, h = im.size
+        if h > 2 * w:
+            canvas = Image.new("RGB", (h // 2, h), SLATE)
+            canvas.paste(im, ((h // 2 - w) // 2, 0))
+            im = canvas
+        out = ROOT / "store-assets/screenshots-play" / src.relative_to(src_root)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        im.save(out)
+        print(f"{out.relative_to(ROOT)}: {im.size[0]}x{im.size[1]}")
+
+
 if __name__ == "__main__":
     feature_graphic()
+    fit_screenshots()
