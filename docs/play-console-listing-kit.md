@@ -54,9 +54,9 @@ Sensory SafeScape is an educational and calming tool. It is not a medical device
 |---|---|
 | App icon 512×512 | `store-assets/icon-512.png` |
 | Feature graphic 1024×500 | `store-assets/feature-graphic-1024x500.png` |
-| Phone screenshots (1080×2400) | `store-assets/screenshots/phone/` |
-| 7-inch tablet | `store-assets/screenshots/tablet-7in/` |
-| 10-inch tablet | `store-assets/screenshots/tablet-10in/` |
+| Phone screenshots (upload these) | `store-assets/screenshots-play/phone/` (10 × 800×1600, from a Samsung Galaxy A12 at font size ×1.3; status bar blanked, padded to Play's 2:1 limit) |
+| Raw captures | `store-assets/screenshots/phone/` (720×1600; regenerate the Play set with `python3 scripts/make_store_assets.py`) |
+| Tablet screenshots | Optional; not captured. Only needed to be featured on tablets. `scripts/take_screenshots.sh` accepts a `wm size` for a tablet-sized capture. |
 
 ## App content (Policy) answers
 | Section | Answer |

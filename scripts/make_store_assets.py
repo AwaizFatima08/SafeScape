@@ -65,6 +65,10 @@ def fit_screenshots():
     for src in sorted(src_root.rglob("*.png")):
         im = Image.open(src).convert("RGB")
         w, h = im.size
+        # Hide the phone's status bar (notification icons, battery level):
+        # every SafeScape screen is plain slate there, so this only removes
+        # system chrome, never app content.
+        ImageDraw.Draw(im).rectangle([0, 0, w, int(h * 0.0275)], fill=SLATE)
         if h > 2 * w:
             canvas = Image.new("RGB", (h // 2, h), SLATE)
             canvas.paste(im, ((h // 2 - w) // 2, 0))
