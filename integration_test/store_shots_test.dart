@@ -37,7 +37,12 @@ Future<void> tapKey(WidgetTester t, String key, {int settleMs = 1200}) async {
   // Only scroll when the target is off-screen: ensureVisible also moves
   // horizontal ancestors (e.g. a TabBarView) and can switch tabs.
   final r = t.getRect(f);
-  final screen = Offset.zero & t.view.physicalSize / t.view.devicePixelRatio;
+  // Visible area = the enclosing list's viewport if there is one (headers such
+  // as an app bar can cover the rest of the screen), else the whole screen.
+  final lists = find.ancestor(of: f, matching: find.byType(Scrollable));
+  final screen = lists.evaluate().isNotEmpty
+      ? t.getRect(lists.first)
+      : Offset.zero & t.view.physicalSize / t.view.devicePixelRatio;
   if (!screen.contains(r.topLeft) || !screen.contains(r.bottomRight - const Offset(1, 1))) {
     await t.ensureVisible(f);
   }

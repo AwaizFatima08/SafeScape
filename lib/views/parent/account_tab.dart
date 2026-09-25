@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
+import '../../services/store.dart';
 import '../../state/providers.dart';
 import '../../widgets/common.dart';
 
@@ -27,49 +28,16 @@ class _AccountTabState extends ConsumerState<AccountTab> {
   void _toast(String msg) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), duration: const Duration(seconds: 5)));
 
-  Future<(String, String)?> _credentials({required String title, required String action, String? note}) async {
-    final email = TextEditingController();
-    final pass = TextEditingController();
+  Future<(String, String)?> _credentials({
+    required String title,
+    required String action,
+    String? note,
+    String? email,
+  }) async {
     final res = await showDialog<(String, String)>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (note != null) ...[Text(note, style: const TextStyle(color: SC.textDim)), const SizedBox(height: 12)],
-              TextField(
-                key: const ValueKey('acct_email'),
-                controller: email,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'Parent email'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                key: const ValueKey('acct_password'),
-                controller: pass,
-                obscureText: true,
-                autofillHints: const [AutofillHints.password],
-                decoration: const InputDecoration(labelText: 'Password (6+ characters)'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-            key: const ValueKey('acct_submit'),
-            onPressed: () => Navigator.pop(context, (email.text.trim(), pass.text)),
-            child: Text(action),
-          ),
-        ],
-      ),
+      builder: (_) => _CredentialsDialog(title: title, action: action, note: note, email: email),
     );
-    email.dispose();
-    pass.dispose();
     if (res == null || res.$1.isEmpty || res.$2.isEmpty) return null;
     return res;
   }
@@ -145,9 +113,9 @@ class _AccountTabState extends ConsumerState<AccountTab> {
     );
     if (!ok) return;
     await _run(() async {
+      final store = ref.read(storeProvider);
       await ref.read(cloudProvider).signOut();
-      await ref.read(storeProvider).wipe();
-      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+      _leaveToWelcome(store);
     });
   }
 
@@ -162,16 +130,24 @@ class _AccountTabState extends ConsumerState<AccountTab> {
     if (!ok) return;
     String? password;
     if (cloud.signedIn && !cloud.isAnonymous) {
-      final c = await _credentials(title: 'Confirm with your password', action: 'Delete', note: cloud.email);
+      final c = await _credentials(title: 'Confirm with your password', action: 'Delete', email: cloud.email);
       if (c == null) return;
       password = c.$2;
     }
     await _run(() async {
+      final store = ref.read(storeProvider);
       final err = await cloud.deleteAccount(password: password);
       if (err != null) return _toast(err);
-      await ref.read(storeProvider).wipe();
-      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+      _leaveToWelcome(store);
     });
+  }
+
+  /// Go back to the first route *before* wiping: once the data is gone this
+  /// dashboard rebuilds empty and this tab is disposed, so it could no longer
+  /// navigate (it used to leave a blank page on top of the welcome screen).
+  void _leaveToWelcome(AppStore store) {
+    Navigator.of(context).popUntil((r) => r.isFirst);
+    store.wipe();
   }
 
   Future<bool> _confirm(String title, String body, String action) async =>
@@ -328,4 +304,70 @@ class _ActionTile extends StatelessWidget {
       onTap: onTap,
     ),
   );
+}
+
+/// Email + password dialog. It owns its text controllers and disposes them
+/// only when the dialog is gone (not while its closing animation still draws
+/// the fields).
+class _CredentialsDialog extends StatefulWidget {
+  final String title;
+  final String action;
+  final String? note;
+  final String? email;
+  const _CredentialsDialog({required this.title, required this.action, this.note, this.email});
+
+  @override
+  State<_CredentialsDialog> createState() => _CredentialsDialogState();
+}
+
+class _CredentialsDialogState extends State<_CredentialsDialog> {
+  late final _email = TextEditingController(text: widget.email);
+  final _pass = TextEditingController();
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _pass.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final note = widget.note;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (note != null) ...[Text(note, style: const TextStyle(color: SC.textDim)), const SizedBox(height: 12)],
+            TextField(
+              key: const ValueKey('acct_email'),
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              decoration: const InputDecoration(labelText: 'Parent email'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              key: const ValueKey('acct_password'),
+              controller: _pass,
+              obscureText: true,
+              autofillHints: const [AutofillHints.password],
+              decoration: const InputDecoration(labelText: 'Password (6+ characters)'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        FilledButton(
+          key: const ValueKey('acct_submit'),
+          onPressed: () => Navigator.pop(context, (_email.text.trim(), _pass.text)),
+          child: Text(widget.action),
+        ),
+      ],
+    );
+  }
 }

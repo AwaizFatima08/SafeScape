@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:safescape/models/models.dart';
+import 'package:safescape/services/cloud_sync.dart';
 
 import 'helpers.dart';
 
@@ -29,7 +32,12 @@ Future<void> tapKey(WidgetTester t, String key) async {
   // Only scroll when the target is off-screen: ensureVisible also moves
   // horizontal ancestors (e.g. a TabBarView) and can switch tabs.
   final r = t.getRect(f);
-  final screen = Offset.zero & t.view.physicalSize / t.view.devicePixelRatio;
+  // Visible area = the enclosing list's viewport if there is one (headers such
+  // as an app bar can cover the rest of the screen), else the whole screen.
+  final lists = find.ancestor(of: f, matching: find.byType(Scrollable));
+  final screen = lists.evaluate().isNotEmpty
+      ? t.getRect(lists.first)
+      : Offset.zero & t.view.physicalSize / t.view.devicePixelRatio;
   if (!screen.contains(r.topLeft) || !screen.contains(r.bottomRight - const Offset(1, 1))) {
     await t.ensureVisible(f);
   }
@@ -243,6 +251,32 @@ void main() {
     await tapKey(t, 'card_wait');
     noTruncation('wait timer');
   });
+
+  for (final action in ['sign_out', 'delete_all']) {
+    testWidgets('$action returns to the welcome page (not a blank screen)', (t) async {
+      phone(t);
+      final cloud = FirebaseCloudSync(
+        auth: MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'u1', email: 'p@example.com', isAnonymous: false)),
+        db: FakeFirebaseFirestore(),
+      );
+      final env = await t.runAsync(() => makeEnv(cloud: cloud));
+      env!.store.addChild(alias: 'Rowan', ageGroup: '5-7');
+      await t.pumpWidget(env.app());
+      await settle(t);
+      await passGate(t);
+      await tapKey(t, 'tab_account');
+      await tapKey(t, action);
+      await tapKey(t, 'confirm');
+      if (action == 'delete_all') {
+        await t.enterText(find.byKey(const ValueKey('acct_password')), 'secret1');
+        await t.tap(find.byKey(const ValueKey('acct_submit')));
+      }
+      await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+      await settle(t, 2000);
+      expect(env.store.onboarded, isFalse);
+      expect(find.text('Welcome to SafeScape'), findsOneWidget);
+    });
+  }
 
   testWidgets('flow canvas: multi-touch, palettes and reset', (t) async {
     phone(t);

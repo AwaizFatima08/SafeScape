@@ -11,12 +11,11 @@ class SafeScapeApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final store = ref.watch(storeProvider);
     return MaterialApp(
       title: 'Sensory SafeScape',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: store.onboarded ? const HubScreen() : const OnboardingScreen(),
+      home: const RootScreen(),
       builder: (context, child) {
         // Keep text readable but stop huge system font scales breaking cards.
         final mq = MediaQuery.of(context);
@@ -27,6 +26,18 @@ class SafeScapeApp extends ConsumerWidget {
         return Stack(children: [scaled, const SoftLightingOverlay()]);
       },
     );
+  }
+}
+
+/// The first route. It follows the store, so wiping the data (sign-out or
+/// account deletion) always lands on the welcome page, never a blank hub.
+class RootScreen extends ConsumerWidget {
+  const RootScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final onboarded = ref.watch(storeProvider.select((s) => s.onboarded));
+    return onboarded ? const HubScreen() : const OnboardingScreen();
   }
 }
 
