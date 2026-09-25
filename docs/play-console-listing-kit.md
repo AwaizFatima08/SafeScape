@@ -12,10 +12,11 @@ Everything needed to fill in Play Console for the first upload. Upload file: `re
 | Free or paid | Free |
 | Category | Education (alternative: Parenting) |
 | Tags | Education, Parenting, Kids, Calm, Autism support |
-| Email | info@homilabs.org |
-| Website | https://safescape-homilabs.web.app |
-| Privacy policy | https://safescape-homilabs.web.app/privacy |
-| Account deletion URL | https://safescape-homilabs.web.app/delete-account |
+| Email | homilabs.smc@gmail.com |
+| Website | https://safescape.homilabs.org |
+| Privacy policy | https://safescape.homilabs.org/privacy.html |
+| Account deletion URL | https://safescape.homilabs.org/delete-account.html |
+| Terms and conditions | https://safescape.homilabs.org/terms.html |
 
 ## Short description (80)
 Calm sensory play and picture routines for autistic and sensitive children.
@@ -61,7 +62,7 @@ Sensory SafeScape is an educational and calming tool. It is not a medical device
 ## App content (Policy) answers
 | Section | Answer |
 |---|---|
-| Privacy policy | https://safescape-homilabs.web.app/privacy |
+| Privacy policy | https://safescape.homilabs.org/privacy.html |
 | App access | **All functionality is available without special access.** No login is required; the grown-ups area uses a simple multiplication question (shown on screen). |
 | Ads | No, the app does not contain ads |
 | Content rating (IARC) | Category: Reference, News, or Educational. No violence, sexuality, language, controlled substances, gambling, user interaction/communication, sharing of location, or purchases. Expected: Everyone / PEGI 3 |

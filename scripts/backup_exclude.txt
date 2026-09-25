@@ -6,3 +6,4 @@ android/build/
 android/local.properties
 .idea/
 scripts/__pycache__/
+releases/SafeScape-*-package*

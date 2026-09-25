@@ -14,7 +14,8 @@ Calm sensory play (Flow Canvas, Soothing Sounds) and visual routines (step cards
 - Errorless: no fail states, alarms or scores. Parent Zone behind a multiplication gate.
 
 ## Locations
-- Firebase project: `safescape-homilabs` (Firestore + Auth: anonymous, email/password; Hosting for the privacy and deletion pages).
+- Website: `https://safescape.homilabs.org` (owner hosts it; pages in `firebase/hosting/`: index, privacy, terms, delete-account). Contact: `homilabs.smc@gmail.com`. The app links to `/privacy.html` and `/terms.html` there.
+- Firebase project: `safescape-homilabs` (Firestore + Auth: anonymous, email/password; Hosting keeps a mirror of the pages).
 - Local backup: `/mnt/storage/project_backups/safescape_backup/`
 - Google Drive: folder `1MQLHEGvfUOIOxbr9LbQuoM7z3pviZEFW` (rclone remote `gdrive`)
 - GitHub (**public**): `git@github.com:AwaizFatima08/safescape.git`

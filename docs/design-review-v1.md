@@ -61,4 +61,4 @@ Reviewed against `docs/product-design-document-v1.md` (the owner's PDD). Where t
 - **Real children.** Everything is tested on an emulator and by automated tests; a supervised real-device pass (see `docs/testing.md`) is the most valuable next input.
 - **Play developer account type:** personal accounts created after Nov 2023 need a 14-day closed test with 12 testers before production.
 - **Firebase API key restriction** (to the Android package and signing SHA-1s) should be applied in Google Cloud Console once the Play app-signing key exists.
-- **Contact email** in the privacy policy is `info@homilabs.org`; change it in `firebase/hosting/` if another address is preferred.
+- **Website and contact:** the privacy, terms and deletion pages are hosted at `https://safescape.homilabs.org` (source in `firebase/hosting/`; a mirror stays on `safescape-homilabs.web.app`). Contact: `homilabs.smc@gmail.com`.

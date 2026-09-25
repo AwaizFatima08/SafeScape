@@ -9,8 +9,11 @@ import '../../core/theme.dart';
 import '../../state/providers.dart';
 import '../../widgets/common.dart';
 
-const privacyUrl = 'https://safescape-homilabs.web.app/privacy';
-const deletionUrl = 'https://safescape-homilabs.web.app/delete-account';
+const siteUrl = 'https://safescape.homilabs.org';
+const privacyUrl = '$siteUrl/privacy.html';
+const termsUrl = '$siteUrl/terms.html';
+const deletionUrl = '$siteUrl/delete-account.html';
+const contactEmail = 'homilabs.smc@gmail.com';
 
 class AccountTab extends ConsumerStatefulWidget {
   const AccountTab({super.key});
@@ -32,24 +35,28 @@ class _AccountTabState extends ConsumerState<AccountTab> {
       builder: (context) => AlertDialog(
         title: Text(title),
         content: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (note != null) ...[Text(note, style: const TextStyle(color: SC.textDim)), const SizedBox(height: 12)],
-            TextField(
-              key: const ValueKey('acct_email'),
-              controller: email,
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: const [AutofillHints.email],
-              decoration: const InputDecoration(labelText: 'Parent email'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              key: const ValueKey('acct_password'),
-              controller: pass,
-              obscureText: true,
-              autofillHints: const [AutofillHints.password],
-              decoration: const InputDecoration(labelText: 'Password (6+ characters)'),
-            ),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (note != null) ...[Text(note, style: const TextStyle(color: SC.textDim)), const SizedBox(height: 12)],
+              TextField(
+                key: const ValueKey('acct_email'),
+                controller: email,
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
+                decoration: const InputDecoration(labelText: 'Parent email'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                key: const ValueKey('acct_password'),
+                controller: pass,
+                obscureText: true,
+                autofillHints: const [AutofillHints.password],
+                decoration: const InputDecoration(labelText: 'Password (6+ characters)'),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -98,7 +105,8 @@ class _AccountTabState extends ConsumerState<AccountTab> {
     final c = await _credentials(
       title: 'Sign in to an existing account',
       action: 'Sign in',
-      note: 'Children, routines and progress from that account are added to this device, '
+      note:
+          'Children, routines and progress from that account are added to this device, '
           'and anything on this device is added to the account.',
     );
     if (c == null) return;
@@ -112,20 +120,29 @@ class _AccountTabState extends ConsumerState<AccountTab> {
       store.data.settings.cloudBackup = true;
       await store.flush();
       await cloud.pushAll(store.data);
-      _toast(snap == null ? 'Signed in. (Could not load the cloud copy yet; it will sync later.)' : 'Signed in and synced.');
+      _toast(
+        snap == null ? 'Signed in. (Could not load the cloud copy yet; it will sync later.)' : 'Signed in and synced.',
+      );
     });
   }
 
   Future<void> _reset() async {
-    final c = await _credentials(title: 'Reset password', action: 'Send email', note: 'Enter your email; leave any password.');
+    final c = await _credentials(
+      title: 'Reset password',
+      action: 'Send email',
+      note: 'Enter your email; leave any password.',
+    );
     if (c == null) return;
     final err = await ref.read(cloudProvider).sendPasswordReset(c.$1);
     _toast(err ?? 'Password reset email sent to ${c.$1}.');
   }
 
   Future<void> _signOut() async {
-    final ok = await _confirm('Sign out of this device?',
-        'Everything is removed from this device but stays in your account. Sign in again to bring it back.', 'Sign out');
+    final ok = await _confirm(
+      'Sign out of this device?',
+      'Everything is removed from this device but stays in your account. Sign in again to bring it back.',
+      'Sign out',
+    );
     if (!ok) return;
     await _run(() async {
       await ref.read(cloudProvider).signOut();
@@ -179,12 +196,12 @@ class _AccountTabState extends ConsumerState<AccountTab> {
     final status = !cloud.available
         ? 'Cloud backup is not available on this device.'
         : !store.settings.cloudBackup
-            ? 'Off. Everything stays on this device only.'
-            : linked
-                ? 'On, linked to ${cloud.email}.'
-                : cloud.signedIn
-                    ? 'On, as a private guest. Add an email so you can restore on a new device.'
-                    : 'On. Waiting for an internet connection.';
+        ? 'Off. Everything stays on this device only.'
+        : linked
+        ? 'On, linked to ${cloud.email}.'
+        : cloud.signedIn
+        ? 'On, as a private guest. Add an email so you can restore on a new device.'
+        : 'On. Waiting for an internet connection.';
 
     return AbsorbPointer(
       absorbing: _busy,
@@ -204,9 +221,11 @@ class _AccountTabState extends ConsumerState<AccountTab> {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 6, 4, 0),
-            child: Text('Backed up: nicknames, age groups, settings, routines (without photos) and activity times. '
-                'Never uploaded: photos, audio, location or contacts.',
-                style: TextStyle(color: SC.textDim)),
+            child: Text(
+              'Backed up: nicknames, age groups, settings, routines (without photos) and activity times. '
+              'Never uploaded: photos, audio, location or contacts.',
+              style: TextStyle(color: SC.textDim),
+            ),
           ),
           const SectionTitle('Account'),
           if (!linked)
@@ -228,7 +247,12 @@ class _AccountTabState extends ConsumerState<AccountTab> {
           if (!linked)
             _ActionTile(icon: Icons.key_rounded, title: 'Forgot password', onTap: cloud.available ? _reset : null),
           if (linked)
-            _ActionTile(key: const ValueKey('sign_out'), icon: Icons.logout_rounded, title: 'Sign out of this device', onTap: _signOut),
+            _ActionTile(
+              key: const ValueKey('sign_out'),
+              icon: Icons.logout_rounded,
+              title: 'Sign out of this device',
+              onTap: _signOut,
+            ),
           _ActionTile(
             key: const ValueKey('delete_all'),
             icon: Icons.delete_forever_rounded,
@@ -240,7 +264,10 @@ class _AccountTabState extends ConsumerState<AccountTab> {
           if (cloud.signedIn)
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-              child: SelectableText('Account ID: ${cloud.uid}', style: const TextStyle(color: SC.textDim, fontSize: 13)),
+              child: SelectableText(
+                'Account ID: ${cloud.uid}',
+                style: const TextStyle(color: SC.textDim, fontSize: 13),
+              ),
             ),
           const SectionTitle('About'),
           _ActionTile(
@@ -249,9 +276,24 @@ class _AccountTabState extends ConsumerState<AccountTab> {
             onTap: () => launchUrl(Uri.parse(privacyUrl), mode: LaunchMode.externalApplication),
           ),
           _ActionTile(
+            icon: Icons.description_rounded,
+            title: 'Terms and conditions',
+            onTap: () => launchUrl(Uri.parse(termsUrl), mode: LaunchMode.externalApplication),
+          ),
+          _ActionTile(
+            icon: Icons.mail_outline_rounded,
+            title: 'Contact us',
+            subtitle: contactEmail,
+            onTap: () => launchUrl(
+              Uri(scheme: 'mailto', path: contactEmail, query: 'subject=Sensory SafeScape'),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+          _ActionTile(
             icon: Icons.info_outline_rounded,
             title: 'Sensory SafeScape 1.0',
-            subtitle: 'Calm sensory play and visual routines. An educational tool, not a medical device. '
+            subtitle:
+                'Calm sensory play and visual routines. An educational tool, not a medical device. '
                 'Pictograms: Noto Emoji (Apache 2.0). Font: Andika (SIL OFL).',
           ),
         ],
@@ -266,7 +308,14 @@ class _ActionTile extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onTap;
   final Color color;
-  const _ActionTile({super.key, required this.icon, required this.title, this.subtitle, this.onTap, this.color = SC.lavender});
+  const _ActionTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.onTap,
+    this.color = SC.lavender,
+  });
 
   @override
   Widget build(BuildContext context) => Card(
