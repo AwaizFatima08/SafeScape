@@ -10,8 +10,8 @@ rm -rf "$OUT" "$OUT.zip"
 mkdir -p "$OUT"/{1_upload_to_play_console,2_website_safescape.homilabs.org,3_store_listing/phone_screenshots,4_test_apk_for_phones}
 
 cp "$SRC/safescape-$VER.aab" "$OUT/1_upload_to_play_console/"
-cp firebase/hosting/{index,privacy,terms,delete-account}.html firebase/hosting/style.css firebase/hosting/icon.png \
-  "$OUT/2_website_safescape.homilabs.org/"
+python3 scripts/make_website.py > /dev/null
+cp -r firebase/hosting/. "$OUT/2_website_safescape.homilabs.org/"
 cp store-assets/icon-512.png store-assets/feature-graphic-1024x500.png "$OUT/3_store_listing/"
 cp store-assets/screenshots-play/phone/*.png "$OUT/3_store_listing/phone_screenshots/"
 cp docs/play-console-listing-kit.md "$OUT/3_store_listing/play-console-answers.md"
@@ -46,7 +46,7 @@ Package name: com.homilabs.safescape
    Signed with the SafeScape upload key. Let Google manage the app signing key (Play App Signing).
 
 2_website_safescape.homilabs.org/
-   Upload these 6 files to the root of https://safescape.homilabs.org so that these URLs work:
+   Upload everything in this folder (4 pages, style.css, icon.png, images/) to the root of https://safescape.homilabs.org so that these URLs work:
      https://safescape.homilabs.org/                    (index.html)
      https://safescape.homilabs.org/privacy.html
      https://safescape.homilabs.org/terms.html
