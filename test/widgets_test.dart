@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:safescape/views/breathing_screen.dart';
+import 'package:safescape/views/bubbles_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
@@ -419,5 +421,91 @@ void main() {
     expect(env.store.data.children.length, 2);
     expect(env.store.activeChild!.alias, 'Second');
     expect(find.byKey(const ValueKey('child_switcher')), findsOneWidget);
+  });
+
+  testWidgets('breathing buddy: patterns switch, the label guides, a session is logged', (t) async {
+    phone(t);
+    final env = await t.runAsync(() => makeEnv());
+    final c = env!.store.addChild(alias: 'B', ageGroup: '5-7');
+    await t.pumpWidget(env.app());
+    await settle(t);
+    await t.dragUntilVisible(find.byKey(const ValueKey('card_breathing')), find.byKey(const ValueKey('hub_grid')),
+        const Offset(0, -120));
+    await tapKey(t, 'card_breathing');
+    expect(find.text('Breathe in'), findsOneWidget);
+    await tapKey(t, 'breath_flower');
+    await t.pump(const Duration(milliseconds: 500));
+    expect(find.text('Smell the flower'), findsOneWidget);
+    await tapKey(t, 'breath_box');
+    await t.pump(const Duration(seconds: 5));
+    expect(find.text('Hold'), findsOneWidget);
+    await t.pump(const Duration(seconds: 6));
+    await tapKey(t, 'home');
+    final sessions = env.store.sessionsFor(c.id);
+    expect(sessions.where((s) => s.mode == 'breathing' && s.sound == 'box'), hasLength(1));
+  });
+
+  testWidgets('bubble pop: a touch pops a bubble with a soft pop, the visit is logged', (t) async {
+    phone(t);
+    final env = await t.runAsync(() => makeEnv());
+    final c = env!.store.addChild(alias: 'B', ageGroup: '5-7');
+    await t.pumpWidget(env.app());
+    await settle(t);
+    await t.dragUntilVisible(find.byKey(const ValueKey('card_bubbles')), find.byKey(const ValueKey('hub_grid')),
+        const Offset(0, -120));
+    await tapKey(t, 'card_bubbles');
+    expect(find.text('Touch a bubble'), findsOneWidget);
+    final state = t.state(find.byType(BubblesScreen)) as dynamic;
+    final BubbleSim sim = state.sim;
+    for (var i = 0; i < 90; i++) {
+      await t.pump(const Duration(milliseconds: 100));
+    }
+    final b = sim.bubbles.firstWhere((b) => !b.popped);
+    final box = t.getTopLeft(find.byKey(const ValueKey('bubble_canvas')));
+    await t.tapAt(box + Offset(b.x, b.y));
+    await t.pump(const Duration(milliseconds: 100));
+    expect(b.popped, isTrue);
+    expect(env.sound.played, contains('sfx:pop'));
+    await t.pump(const Duration(seconds: 2));
+    await tapKey(t, 'home');
+    expect(env.store.sessionsFor(c.id).where((s) => s.mode == 'bubbles'), hasLength(1));
+  });
+
+  testWidgets('feelings check-in: a face is logged, Sammy answers, the dashboard counts it', (t) async {
+    phone(t);
+    final env = await t.runAsync(() => makeEnv());
+    final c = env!.store.addChild(alias: 'F', ageGroup: '5-7');
+    await t.pumpWidget(env.app());
+    await settle(t);
+    await t.dragUntilVisible(find.byKey(const ValueKey('card_feelings')), find.byKey(const ValueKey('hub_grid')),
+        const Offset(0, -120));
+    await tapKey(t, 'card_feelings');
+    expect(find.text('How do you feel?'), findsOneWidget);
+    await tapKey(t, 'feel_sad');
+    expect(find.byKey(const ValueKey('sammy_says')), findsOneWidget);
+    expect(find.byKey(const ValueKey('feel_go_label')), findsOneWidget);
+    final f = env.store.sessionsFor(c.id).where((s) => s.mode == 'feeling');
+    expect(f.map((s) => s.sound), ['sad']);
+    await tapKey(t, 'feel_go');
+    expect(find.byType(BreathingScreen), findsOneWidget);
+    await tapKey(t, 'home');
+    await passGate(t);
+    expect(find.byKey(const ValueKey('feelings_card')), findsOneWidget);
+    expect(find.text('Sad'), findsOneWidget);
+  });
+
+  testWidgets('soothing sounds: all eight loops are on the grid and play the filtered variant', (t) async {
+    phone(t);
+    final env = await t.runAsync(() => makeEnv());
+    env!.store.addChild(alias: 'S', ageGroup: '5-7');
+    await t.pumpWidget(env.app());
+    await settle(t);
+    await tapKey(t, 'card_sounds');
+    for (final n in soundNames) {
+      expect(find.byKey(ValueKey('sound_$n')), findsOneWidget, reason: n);
+    }
+    await t.ensureVisible(find.byKey(const ValueKey('sound_heartbeat')));
+    await tapKey(t, 'sound_heartbeat');
+    expect(env.sound.played.last, contains('heartbeat'));
   });
 }

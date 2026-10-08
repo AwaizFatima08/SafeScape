@@ -62,3 +62,13 @@ Reviewed against `docs/product-design-document-v1.md` (the owner's PDD). Where t
 - **Play developer account type:** personal accounts created after Nov 2023 need a 14-day closed test with 12 testers before production.
 - **Firebase API key restriction** (to the Android package and signing SHA-1s) should be applied in Google Cloud Console once the Play app-signing key exists.
 - **Website and contact:** the privacy, terms and deletion pages are hosted at `https://safescape.homilabs.org` (source in `firebase/hosting/`; a mirror stays on `safescape-homilabs.web.app`). Contact: `homilabs.smc@gmail.com`.
+
+
+## 5. v1.1 additions (2026-10-08)
+
+Same locked rules (§0): errorless, no numerals shown to the child as scores, Low Motion respected, all audio synthesised and low-passed, no new permissions.
+
+- **Breathing Buddy** (hub card): Sammy breathes with the child. Patterns are chosen by picture: Balloon (4 s in / 6 s out, the canvas ring), Flower & Candle (3 / 5, "smell the flower, blow the candle"), Box (4 / 4 / 4 with a hold). Optional light haptic on each phase change, only when the parent has haptics on. Logged as self-regulation time (`mode: breathing`, pattern in `sound`).
+- **Bubble Pop**: slow pastel bubbles (34–68 px, a 72 dp target with the 24 px grab halo) drift up; a touch pops the nearest with a low-passed "pop" and a ripple. Bubbles that reach the top simply fade; nothing is counted as missed. Low Motion halves the speed via `motionFactor`. Logged as self-regulation time with the touch-rhythm label.
+- **Feelings Check-in** ("How Do I Feel?"): four Noto faces (calm, happy, sad, upset). After a tap Sammy says one gentle sentence (spoken too, if step speech is on) and offers one tool: calm → Sounds, happy → Canvas, sad → Breathing Buddy, upset → Bubble Pop. "Just checking in" leaves without choosing. Only the pick is stored (`mode: feeling`, no duration); the Progress tab shows counts per face and the PDF has a small table. No feeling is treated as wrong.
+- **Content**: Soothing Sounds grows to eight (Deep Brown Noise, Quiet Fan, Slow Heartbeat at 54 bpm, Music Box), all three cutoffs each; five routines with Pakistani family context (Prayer Time, Nap Time, Visiting Family, Playground, Wash Hands).

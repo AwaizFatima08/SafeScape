@@ -48,3 +48,14 @@ ice_cream 1f366
 paint 1f3a8
 bubbles 1fae7
 headphones 1f3a7
+mosque 1f54c
+prayer 1f9ce
+family 1f46a
+playground 1f6dd
+yawn 1f971
+quiet 1f92b
+soap 1f9fc
+face_calm 1f60c
+face_happy 1f60a
+face_sad 1f622
+face_upset 1f620

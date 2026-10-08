@@ -23,7 +23,7 @@ String _str(Object? v, String fallback) => v is String ? v : fallback;
 
 const ageGroups = ['2-4', '5-7', '8-10'];
 const palettes = ['lavender', 'mint', 'sand', 'blue'];
-const soundNames = ['hum', 'rain', 'ocean', 'marimba'];
+const soundNames = ['hum', 'rain', 'ocean', 'marimba', 'brown', 'fan', 'heartbeat', 'musicbox'];
 
 /// Audio cutoffs in Hz, matching the rendered variants in assets/audio/loops.
 const audioCutoffs = [6000, 4000, 2500];
@@ -265,7 +265,7 @@ class Routine {
 class SensorySession {
   final String id;
   final String childId;
-  final String mode; // flow_canvas | sounds | routine | wait_timer
+  final String mode; // flow_canvas | sounds | routine | wait_timer | breathing | bubbles | feeling
   final DateTime start;
   int durationSeconds;
   String? palette;
@@ -293,7 +293,8 @@ class SensorySession {
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
 
-  bool get isCalming => mode == 'flow_canvas' || mode == 'sounds';
+  /// Self-regulation time: the canvas, sounds, breathing and bubbles.
+  bool get isCalming => mode == 'flow_canvas' || mode == 'sounds' || mode == 'breathing' || mode == 'bubbles';
 
   Map<String, dynamic> toJson() => {
     'session_id': id,

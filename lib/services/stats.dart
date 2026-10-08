@@ -42,6 +42,9 @@ class ChildStats {
   final Map<String, int> touchRhythms;
   final List<RoutineSummary> routines;
 
+  /// Feelings Check-in picks in the period, by feeling id (calm, happy, sad, upset).
+  final Map<String, int> feelings;
+
   ChildStats({
     required this.from,
     required this.to,
@@ -57,6 +60,7 @@ class ChildStats {
     required this.sounds,
     required this.touchRhythms,
     required this.routines,
+    this.feelings = const {},
   });
 
   int get calmMinutes => (calmSeconds / 60).round();
@@ -64,7 +68,9 @@ class ChildStats {
   /// Step completion rate across started routine runs (PDD metric 2), 0..1.
   double? get stepCompletionRate => stepsTotal == 0 ? null : stepsDone / stepsTotal;
 
-  bool get isEmpty => calmSessions == 0 && routineRuns == 0;
+  int get feelingsTotal => feelings.values.fold(0, (a, b) => a + b);
+
+  bool get isEmpty => calmSessions == 0 && routineRuns == 0 && feelingsTotal == 0;
 }
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -92,6 +98,7 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
   final snd = <String, (int, int)>{};
   final rhythm = <String, int>{};
   final routineMap = <String, List<SensorySession>>{};
+  final feel = <String, int>{};
 
   for (final s in sessions) {
     if (s.isCalming) {
@@ -103,6 +110,11 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
         final p = s.palette ?? 'lavender';
         _add(modes, 'Flow Canvas (${paletteNames[p] ?? p})', s.durationSeconds);
         _add(pal, paletteNames[p] ?? p, s.durationSeconds);
+        if (s.touchRhythm != null) rhythm[s.touchRhythm!] = (rhythm[s.touchRhythm!] ?? 0) + 1;
+      } else if (s.mode == 'breathing') {
+        _add(modes, 'Breathing Buddy (${breathPatternNames[s.sound] ?? 'Balloon'})', s.durationSeconds);
+      } else if (s.mode == 'bubbles') {
+        _add(modes, 'Bubble Pop', s.durationSeconds);
         if (s.touchRhythm != null) rhythm[s.touchRhythm!] = (rhythm[s.touchRhythm!] ?? 0) + 1;
       } else {
         final n = soundTitles[s.sound] ?? 'Sounds';
@@ -118,6 +130,8 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
       routineMap.putIfAbsent(s.routineTitle ?? 'Routine', () => []).add(s);
     } else if (s.mode == 'wait_timer') {
       _add(modes, 'Wait Timer', s.durationSeconds);
+    } else if (s.mode == 'feeling' && s.sound != null) {
+      feel[s.sound!] = (feel[s.sound!] ?? 0) + 1;
     }
   }
 
@@ -153,6 +167,7 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
     sounds: _rank(snd, byAverage: true),
     touchRhythms: rhythm,
     routines: routines,
+    feelings: feel,
   );
 }
 

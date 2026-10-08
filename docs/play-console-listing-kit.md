@@ -107,3 +107,13 @@ Personal developer accounts created after Nov 2023 must run a **closed test with
 3. Google Cloud console → APIs & Services → Credentials → the Android API key: restrict to package `com.homilabs.safescape` + those SHA-1s.
 
 Upload key (for reference): SHA-1 `FA:1B:C8:2D:40:22:16:C8:53:9F:9E:C2:10:FC:19:79:89:95:21:53`, SHA-256 `66:AD:F5:4F:1B:21:14:96:71:BF:90:D0:D0:A9:5B:74:08:43:5A:19:FE:C4:4F:E3:00:84:F2:A1:EC:B7:EA:D3`.
+
+
+## Release notes — v1.1.0 (versionCode 2)
+
+```
+New: Breathing Buddy (breathe with Sammy: balloon, flower & candle, box), Bubble Pop
+(slow, soft bubbles) and a Feelings Check-in that suggests a calming tool. Four more
+soothing sounds and five more ready-made routines (prayer time, nap, visiting family,
+playground, washing hands).
+```

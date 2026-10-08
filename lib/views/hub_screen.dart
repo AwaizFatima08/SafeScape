@@ -1,5 +1,6 @@
-// Screen 2: the Main Sensory Hub. Uncluttered: four big cards, mute, and a
-// lock that leads to the Parent Zone behind the grown-up gate.
+// Screen 2: the Main Sensory Hub. Uncluttered: seven big cards (scrolling
+// if the screen is short), mute, and a lock that leads to the Parent Zone
+// behind the grown-up gate.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,9 @@ import '../core/theme.dart';
 import '../state/providers.dart';
 import '../widgets/common.dart';
 import '../widgets/sammy.dart';
+import 'breathing_screen.dart';
+import 'bubbles_screen.dart';
+import 'feelings_screen.dart';
 import 'flow_canvas_screen.dart';
 import 'parent/parent_dashboard.dart';
 import 'routines_screen.dart';
@@ -109,13 +113,42 @@ class HubScreen extends ConsumerWidget {
                             color: SC.sand,
                             onTap: () => open(const WaitTimerScreen()),
                           ),
+                          _HubCard(
+                            key: const ValueKey('card_breathing'),
+                            title: 'Breathing Buddy',
+                            subtitle: 'Breathe slowly with Sammy.',
+                            icon: Icons.air_rounded,
+                            color: SC.lavender,
+                            onTap: () => open(const BreathingScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_bubbles'),
+                            title: 'Bubble Pop',
+                            subtitle: 'Pop slow, soft bubbles.',
+                            icon: Icons.bubble_chart_rounded,
+                            color: SC.mint,
+                            onTap: () => open(const BubblesScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_feelings'),
+                            title: 'How Do I Feel?',
+                            subtitle: 'Tap a face. Sammy listens.',
+                            icon: Icons.sentiment_satisfied_rounded,
+                            color: SC.peach,
+                            onTap: () => open(const FeelingsScreen()),
+                          ),
                         ];
+                        // Two rows fit without scrolling on most phones; the rest
+                        // scrolls. Cards keep the same size everywhere.
+                        final cols = wide ? 3 : 2;
+                        final cardH = ((c.maxHeight - 14) / 2).clamp(150.0, 230.0);
                         return GridView.count(
-                          crossAxisCount: 2,
+                          key: const ValueKey('hub_grid'),
+                          crossAxisCount: cols,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: wide ? 1.35 : (c.maxWidth / 2) / ((c.maxHeight - 14) / 2),
-                          physics: const NeverScrollableScrollPhysics(),
+                          childAspectRatio: ((c.maxWidth - 14 * (cols - 1)) / cols) / cardH,
+                          padding: const EdgeInsets.only(bottom: 8),
                           children: cards,
                         );
                       },

@@ -94,7 +94,7 @@ Future<Uint8List> buildReport({
         ),
         pw.SizedBox(height: 12),
         pw.Row(children: [
-          tile('Self-regulation time\n(Flow Canvas + Sounds)', _mins(st.calmSeconds)),
+          tile('Self-regulation time\n(canvas, sounds, breathing, bubbles)', _mins(st.calmSeconds)),
           tile('Calming sessions', '${st.calmSessions}'),
           tile('Routine steps completed', rate == null ? '-' : '${(rate * 100).round()}%'),
           tile('Routines finished / started', '${st.routinesFinished} / ${st.routineRuns}'),
@@ -133,6 +133,13 @@ Future<Uint8List> buildReport({
             st.touchRhythms.entries.map((e) => '${rhythmNames[e.key] ?? e.key}: ${e.value} sessions').join('   '),
             style: const pw.TextStyle(fontSize: 10),
           ),
+        ],
+        if (st.feelingsTotal > 0) ...[
+          h('Feelings check-ins (what the child tapped)'),
+          table(['Feeling', 'Times chosen'], [
+            for (final f in feelings)
+              if ((st.feelings[f.id] ?? 0) > 0) [f.label, '${st.feelings[f.id]}'],
+          ]),
         ],
         h('Visual routines'),
         table(['Routine', 'Runs', 'Finished', 'Steps done'], [

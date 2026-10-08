@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'dart:math';
+import 'package:safescape/views/breathing_screen.dart';
+import 'package:safescape/views/bubbles_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:safescape/core/content.dart';
 import 'package:safescape/models/models.dart';
@@ -190,6 +193,82 @@ void main() {
       }
       for (final n in ['tap', 'step', 'done', 'wait_end']) {
         expect(File('assets/audio/sfx/$n.wav').existsSync(), isTrue, reason: n);
+      }
+    });
+  });
+
+  group('v1.1 activities in the stats', () {
+    test('breathing and bubbles count as self-regulation time; feelings are counted, not timed', () {
+      final now = DateTime(2026, 10, 8, 12);
+      SensorySession s(String mode, int secs, {String? sound, String? rhythm}) => SensorySession(
+          id: newId('s'), childId: 'c', mode: mode, start: now, durationSeconds: secs, sound: sound, touchRhythm: rhythm);
+      final st = computeStats([
+        s('breathing', 120, sound: 'box'),
+        s('bubbles', 180, rhythm: 'slow_rhythmic'),
+        s('feeling', 0, sound: 'sad'),
+        s('feeling', 0, sound: 'sad'),
+        s('feeling', 0, sound: 'happy'),
+      ], now: now);
+      expect(st.calmSeconds, 300);
+      expect(st.calmSessions, 2);
+      expect(st.topModes.map((m) => m.label), containsAll(['Breathing Buddy (Box)', 'Bubble Pop']));
+      expect(st.touchRhythms, {'slow_rhythmic': 1});
+      expect(st.feelings, {'sad': 2, 'happy': 1});
+      expect(st.feelingsTotal, 3);
+      expect(st.isEmpty, isFalse);
+    });
+
+    test('breath patterns: phases follow in/hold/out and the ring is 0..1', () {
+      final box = breathPatterns.firstWhere((p) => p.id == 'box');
+      expect(breathPhaseAt(box, 0).$2, BreathPhase.inhale);
+      expect(breathPhaseAt(box, 3.99).$1, closeTo(1, 0.01));
+      expect(breathPhaseAt(box, 5).$2, BreathPhase.hold);
+      expect(breathPhaseAt(box, 9).$2, BreathPhase.exhale);
+      expect(breathPhaseAt(box, 11.99).$1, closeTo(0, 0.01));
+      final balloon = breathPatterns.first;
+      expect(balloon.cycle, 10);
+      expect(breathPhaseAt(balloon, 7).$2, BreathPhase.exhale);
+    });
+
+    test('bubble sim: spawns slowly, a touch pops the nearest bubble, nothing is ever lost', () {
+      final sim = BubbleSim(random: Random(1))..resize(const Size(400, 800));
+      for (var i = 0; i < 300; i++) {
+        sim.step(1 / 30);
+      }
+      expect(sim.bubbles.where((b) => !b.popped).length, inInclusiveRange(1, 7));
+      final b = sim.bubbles.firstWhere((b) => !b.popped);
+      expect(sim.touch(b.x + 5, b.y - 5), same(b));
+      expect(b.popped, isTrue);
+      expect(sim.touch(-500, -500), isNull);
+      // Let everything drift off the top: the sim keeps going with fresh bubbles.
+      for (var i = 0; i < 3000; i++) {
+        sim.step(1 / 30);
+      }
+      expect(sim.bubbles.every((b) => b.life > 0), isTrue);
+      expect(sim.pops, isEmpty);
+    });
+
+    test('content: 13 routine templates, 8 sounds, every icon file exists', () {
+      expect(routineTemplates, hasLength(13));
+      expect(soundNames, hasLength(8));
+      for (final n in soundNames) {
+        expect(soundTitles.containsKey(n), isTrue, reason: n);
+        for (final v in ['6k', '4k', '2k5']) {
+          expect(File('assets/audio/loops/${n}_$v.wav').existsSync(), isTrue, reason: '$n $v');
+        }
+      }
+      expect(File('assets/audio/sfx/pop.wav').existsSync(), isTrue);
+      for (final k in iconLabels.keys) {
+        expect(File('assets/icons/$k.png').existsSync(), isTrue, reason: k);
+      }
+      for (final t in routineTemplates) {
+        expect(iconLabels.containsKey(t.icon), isTrue, reason: t.title);
+        for (final st in t.steps) {
+          expect(iconLabels.containsKey(st.icon), isTrue, reason: '${t.title}/${st.title}');
+        }
+      }
+      for (final f in feelings) {
+        expect(iconLabels.containsKey(f.icon), isTrue);
       }
     });
   });

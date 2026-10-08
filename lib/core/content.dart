@@ -55,6 +55,17 @@ const iconLabels = <String, String>{
   'paint': 'Art',
   'bubbles': 'Bubbles',
   'headphones': 'Headphones',
+  'mosque': 'Mosque',
+  'prayer': 'Prayer',
+  'family': 'Family',
+  'playground': 'Playground',
+  'yawn': 'Sleepy',
+  'quiet': 'Quiet',
+  'soap': 'Soap',
+  'face_calm': 'Calm',
+  'face_happy': 'Happy',
+  'face_sad': 'Sad',
+  'face_upset': 'Upset',
 };
 
 String iconAsset(String key) =>
@@ -139,6 +150,42 @@ const routineTemplates = <RoutineTemplate>[
     TemplateStep('Goodnight hug', 'hug'),
     TemplateStep('Lights off and sleep', 'bed', 'My room is dark and quiet. I close my eyes and breathe slowly.'),
   ]),
+  RoutineTemplate('Prayer Time', 'mosque', [
+    TemplateStep('Wash for wudu', 'wash_hands', 'I wash my hands, face and feet with cool water.'),
+    TemplateStep('Lay out the mat', 'prayer'),
+    TemplateStep('Stand quietly', 'quiet', 'Everyone is quiet now. I can stand next to my family.'),
+    TemplateStep('Pray together', 'prayer', 'We bow and sit together. It is calm.'),
+    TemplateStep('All finished', 'star'),
+  ]),
+  RoutineTemplate('Nap Time', 'yawn', [
+    TemplateStep('Close the curtains', 'moon'),
+    TemplateStep('Lie down', 'bed', 'The bed is soft. I can hold my toy.'),
+    TemplateStep('Quiet sounds', 'headphones', 'Soft sounds help me rest.'),
+    TemplateStep('Rest my eyes', 'sleep'),
+  ]),
+  RoutineTemplate('Visiting Family', 'family', [
+    TemplateStep('Put on shoes', 'shoes'),
+    TemplateStep('Ride in the car', 'car'),
+    TemplateStep('Say salaam', 'wave', 'I say salaam. I can wave instead of hugging if I like.'),
+    TemplateStep('Snack together', 'snack'),
+    TemplateStep('Quiet corner if I need it', 'calm', 'If it gets loud, I can sit in a quiet corner and breathe.'),
+    TemplateStep('Go home', 'home'),
+  ]),
+  RoutineTemplate('Playground', 'playground', [
+    TemplateStep('Put on shoes', 'shoes'),
+    TemplateStep('Walk to the park', 'park'),
+    TemplateStep('Wait for my turn', 'waiting', 'Other children are playing too. I wait, then it is my turn.'),
+    TemplateStep('Slide and swing', 'playground'),
+    TemplateStep('Drink some water', 'drink'),
+    TemplateStep('Time to go home', 'home'),
+  ]),
+  RoutineTemplate('Wash Hands', 'soap', [
+    TemplateStep('Water on', 'wash_hands'),
+    TemplateStep('Soap and rub', 'soap', 'I rub my palms, the backs, and between my fingers.'),
+    TemplateStep('Rinse', 'bubbles'),
+    TemplateStep('Dry', 'hug'),
+    TemplateStep('All clean', 'star'),
+  ]),
 ];
 
 /// Human names for palettes and sounds (dashboard, PDF, canvas chips).
@@ -154,6 +201,10 @@ const soundTitles = {
   'rain': 'Soft Rain',
   'ocean': 'Ocean Waves',
   'marimba': 'Marimba Lullaby',
+  'brown': 'Deep Brown Noise',
+  'fan': 'Quiet Fan',
+  'heartbeat': 'Slow Heartbeat',
+  'musicbox': 'Music Box',
 };
 
 const modeNames = {
@@ -161,4 +212,48 @@ const modeNames = {
   'sounds': 'Soothing Sounds',
   'routine': 'Visual Routine',
   'wait_timer': 'Wait Timer',
+  'breathing': 'Breathing Buddy',
+  'bubbles': 'Bubble Pop',
+  'feeling': 'Feelings Check-in',
 };
+
+/// Breathing Buddy patterns: seconds in / hold / out. Picked by picture.
+class BreathPattern {
+  final String id;
+  final String title;
+  final String inLabel;
+  final String outLabel;
+  final double inhale;
+  final double hold;
+  final double exhale;
+  const BreathPattern(this.id, this.title, this.inLabel, this.outLabel, this.inhale, this.hold, this.exhale);
+  double get cycle => inhale + hold + exhale;
+}
+
+const breathPatterns = [
+  BreathPattern('balloon', 'Balloon', 'Breathe in', 'Breathe out', 4, 0, 6),
+  BreathPattern('flower', 'Flower & Candle', 'Smell the flower', 'Blow the candle', 3, 0, 5),
+  BreathPattern('box', 'Box', 'Breathe in', 'Breathe out', 4, 4, 4),
+];
+
+const breathPatternNames = {'balloon': 'Balloon', 'flower': 'Flower & Candle', 'box': 'Box'};
+
+/// Feelings Check-in: four faces, and the calming tool Sammy suggests.
+class Feeling {
+  final String id;
+  final String label;
+  final String icon;
+  final String sammySays;
+  final String suggestedMode; // hub route the suggestion opens
+  final String suggestionLabel;
+  const Feeling(this.id, this.label, this.icon, this.sammySays, this.suggestedMode, this.suggestionLabel);
+}
+
+const feelings = [
+  Feeling('calm', 'Calm', 'face_calm', 'Lovely and calm. Shall we listen to a soft sound?', 'sounds', 'Soothing Sounds'),
+  Feeling('happy', 'Happy', 'face_happy', 'Happy! Let\'s make some gentle waves.', 'flow_canvas', 'Calming Canvas'),
+  Feeling('sad', 'Sad', 'face_sad', 'It is okay to feel sad. Let\'s breathe together, slowly.', 'breathing', 'Breathing Buddy'),
+  Feeling('upset', 'Upset', 'face_upset', 'That is a big feeling. Let\'s pop some slow bubbles.', 'bubbles', 'Bubble Pop'),
+];
+
+const feelingNames = {'calm': 'Calm', 'happy': 'Happy', 'sad': 'Sad', 'upset': 'Upset'};

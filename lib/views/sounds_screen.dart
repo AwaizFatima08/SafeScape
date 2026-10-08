@@ -1,4 +1,4 @@
-// Soothing Sounds: four pre-filtered loops, a big volume slider, and an
+// Soothing Sounds: eight pre-filtered loops, a big volume slider, and an
 // optional slow fade-out for bedtime.
 
 import 'dart:async';
@@ -37,8 +37,21 @@ class _SoundsScreenState extends ConsumerState<SoundsScreen> with WidgetsBinding
     'rain': Icons.water_drop_rounded,
     'ocean': Icons.waves_rounded,
     'marimba': Icons.piano_rounded,
+    'brown': Icons.nights_stay_rounded,
+    'fan': Icons.mode_fan_off_rounded,
+    'heartbeat': Icons.favorite_rounded,
+    'musicbox': Icons.music_note_rounded,
   };
-  static const _colors = {'hum': SC.lavender, 'rain': SC.blue, 'ocean': SC.mint, 'marimba': SC.sand};
+  static const _colors = {
+    'hum': SC.lavender,
+    'rain': SC.blue,
+    'ocean': SC.mint,
+    'marimba': SC.sand,
+    'brown': SC.lavender,
+    'fan': SC.blue,
+    'heartbeat': SC.peach,
+    'musicbox': SC.sand,
+  };
 
   @override
   void initState() {

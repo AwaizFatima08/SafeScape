@@ -10,8 +10,8 @@ Design rules (docs/design-review-v1.md, L11):
   * Soft attacks only; no clicks, buzzes or sudden peaks.
 
 Output:
-  assets/audio/loops/{hum,rain,ocean,marimba}_{6k,4k,2k5}.wav
-  assets/audio/sfx/{tap,step,done,wait_end}.wav
+  assets/audio/loops/{hum,rain,ocean,marimba,brown,fan,heartbeat,musicbox}_{6k,4k,2k5}.wav
+  assets/audio/sfx/{tap,step,done,wait_end,pop}.wav
 """
 import pathlib
 import wave
@@ -137,9 +137,67 @@ def make_marimba(n):
     return place_circular(n, notes)
 
 
-def render_loops():
+def make_brown(n):
+    # Deep brown noise with a very slow, loop-periodic swell: the "fan in the
+    # next room" bed many autistic children settle to.
+    y = loop_noise(n, 2.0)
+    y = y / np.abs(y).max()
+    t = np.arange(n) / BASE_SR
+    return y * (0.8 + 0.2 * np.sin(2 * np.pi * t / 20))
+
+
+def make_fan(n):
+    # Box fan: brownish bed plus a soft rotor hum (whole cycles, so it loops).
+    bed = loop_noise(n, 1.6)
+    bed = bed / np.abs(bed).max()
+    t = np.arange(n) / BASE_SR
+    rotor = sum(a * np.sin(2 * np.pi * whole_cycles(f) * t) for f, a in [(55, 0.5), (110, 0.3), (165, 0.12)])
+    flutter = 1 + 0.06 * np.sin(2 * np.pi * whole_cycles(5.5) * t)
+    return 0.8 * bed * flutter + 0.35 * rotor
+
+
+def make_heartbeat(n):
+    # 54 bpm resting heartbeat: "lub" then a softer "dub", low and round.
+    beats = []
+    period = 60 / 54
+    for i in range(int(LOOP_SECONDS / period)):
+        start = i * period
+        for off, amp, freq in [(0.0, 0.9, 62.0), (0.18, 0.55, 54.0)]:
+            d = int(0.22 * BASE_SR)
+            tt = np.arange(d) / BASE_SR
+            env = np.minimum(1, tt / 0.012) * np.exp(-tt / 0.06)
+            beats.append((start + off, amp * env * np.sin(2 * np.pi * freq * tt)))
+    bed = 0.08 * loop_noise(n, 2.0) / np.abs(loop_noise(n, 2.0)).max()
+    return place_circular(n, beats) + bed
+
+
+def make_musicbox(n):
+    # A slow music-box phrase (C major pentatonic, two octaves up), plucked and
+    # mellow: pure-ish tones with a quick decay, one note every 1.5 s.
+    scale = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5]
+    melody = [0, 2, 4, 2, 3, 1, 0, 1, 2, 4, 5, 4, 2, 1]
+    notes = []
+    for i, k in enumerate(melody):
+        f = scale[k]
+        d = int(2.5 * BASE_SR)
+        tt = np.arange(d) / BASE_SR
+        attack = np.minimum(1, tt / 0.004)
+        tone = (np.sin(2 * np.pi * f * tt) + 0.15 * np.sin(2 * np.pi * 2 * f * tt)) * np.exp(-tt / 0.9)
+        notes.append((i * 1.5, 0.7 * attack * tone))
+        if i % 7 == 0:
+            notes.append((i * 1.5, 0.35 * attack * np.sin(2 * np.pi * f / 2 * tt) * np.exp(-tt / 1.2)))
+    return place_circular(n, notes)
+
+
+LOOPS = [("hum", make_hum), ("rain", make_rain), ("ocean", make_ocean), ("marimba", make_marimba),
+         ("brown", make_brown), ("fan", make_fan), ("heartbeat", make_heartbeat), ("musicbox", make_musicbox)]
+
+
+def render_loops(only=None):
     n = int(LOOP_SECONDS * BASE_SR)
-    for name, fn in [("hum", make_hum), ("rain", make_rain), ("ocean", make_ocean), ("marimba", make_marimba)]:
+    for name, fn in LOOPS:
+        if only and name not in only:
+            continue
         raw = fn(n)
         for label, (cutoff, sr) in VARIANTS.items():
             y = circular_lowpass(raw, BASE_SR, cutoff)
@@ -178,6 +236,12 @@ def render_sfx():
     save(ROOT / "sfx" / "done.wav", finish(seq(3.0, arp), 0.5), sr)
     # wait_end: one low, soft marimba note (the wait timer is over)
     save(ROOT / "sfx" / "wait_end.wav", finish(marimba_note(196.0, 2.5), 0.45), sr)
+    # pop: a round, low bubble pop for Bubble Pop (a falling blip, no click)
+    d = int(0.16 * BASE_SR)
+    t = np.arange(d) / BASE_SR
+    f = 520 * np.exp(-t / 0.05) + 180
+    pop = np.sin(2 * np.pi * np.cumsum(f) / BASE_SR) * np.minimum(1, t / 0.004) * np.exp(-t / 0.045)
+    save(ROOT / "sfx" / "pop.wav", finish(pop, 0.4), sr)
 
 
 def verify():
@@ -197,6 +261,13 @@ def verify():
 
 
 if __name__ == "__main__":
+    import sys
+    if sys.argv[1:] == ["new"]:
+        # Only the v1.1 additions, so the shipped v1.0 files stay byte-identical.
+        render_loops(only={"brown", "fan", "heartbeat", "musicbox"})
+        render_sfx()
+        verify()
+        sys.exit()
     render_loops()
     render_sfx()
     verify()

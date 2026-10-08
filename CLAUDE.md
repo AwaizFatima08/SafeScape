@@ -1,6 +1,6 @@
 # Sensory SafeScape
 
-Calm sensory play (Flow Canvas, Soothing Sounds) and visual routines (step cards, First/Then, Wait Timer) for autistic and sensory-sensitive children aged 2–10, with a Parent & Therapist dashboard. Free, no ads, no tracking. Separate from EchoSteps and Sound Painter; don't carry their decisions over unless §0 of the design review says so.
+Calm sensory play (Flow Canvas, Soothing Sounds, Breathing Buddy, Bubble Pop, Feelings Check-in) and visual routines (step cards, First/Then, Wait Timer) for autistic and sensory-sensitive children aged 2–10, with a Parent & Therapist dashboard. Free, no ads, no tracking. Separate from EchoSteps and Sound Painter; don't carry their decisions over unless §0 of the design review says so.
 
 ## Source of truth
 - `docs/product-design-document-v1.md`: the owner's PDD (the starting point).
@@ -24,12 +24,15 @@ Calm sensory play (Flow Canvas, Soothing Sounds) and visual routines (step cards
 ## Code map
 - `lib/models/models.dart`: ChildProfile, SensoryProfile, Routine/RoutineStep, SensorySession, GlobalSettings, AppData (JSON, tolerant of bad input).
 - `lib/services/`: `store.dart` (local-first store, serial atomic writes, merge), `cloud_sync.dart` (Firestore mirror + auth), `audio.dart` (just_audio loops/SFX with fades), `speech.dart` (slow TTS), `stats.dart` (Calm & Focus Horizon), `report.dart` (OT PDF).
-- `lib/views/`: onboarding, hub, `flow_sim.dart` + `flow_canvas_screen.dart`, routines + routine player, sounds, wait timer, `parent/` (dashboard tabs, routine editor).
+- `lib/views/`: onboarding, hub, `flow_sim.dart` + `flow_canvas_screen.dart`, `breathing_screen.dart` (patterns in `core/content.dart`), `bubbles_screen.dart` (`BubbleSim` + painter), `feelings_screen.dart`, routines + routine player, sounds, wait timer, `parent/` (dashboard tabs, routine editor).
 - `lib/widgets/`: `sammy.dart` (CustomPainter turtle), `common.dart` (72 dp buttons, mute, parent gate, step pictures).
-- `scripts/`: `make_audio.py` (all audio, verifies cutoffs), `make_icon.py`, `fetch_icons.sh` (Noto emoji pictograms), `make_store_assets.py`, `backup.sh`.
+- `scripts/`: `make_audio.py` (all audio, verifies cutoffs; `make_audio.py new` renders only the v1.1 loops + pop so v1.0 files stay identical), `make_icon.py`, `fetch_icons.sh` (Noto emoji pictograms), `make_store_assets.py`, `backup.sh`.
 
 ## Commands
 - Tests: `flutter test` (unit + widget) and `flutter test integration_test/app_flow_test.dart -d <device>`.
 - Release: `flutter build appbundle --release` (signs via `android/key.properties` → `.secrets/safescape-upload.keystore`).
 - Builds need `JAVA_HOME=~/jdks/jdk-21.0.12.1+1`. Another session may stop the shared Gradle daemon mid-build ("stop command received"); just rerun.
 - Emulator AVD `safescape_api35` (`ANDROID_AVD_HOME=/mnt/storage/projects/android-avd`), a dedicated AVD (EchoSteps has its own). Start with `-port 5570 -gpu swangle_indirect -cores 3 -memory 3072` when RAM allows: running it next to another session's emulator and Gradle daemon can exhaust the 15 GB.
+
+## Status (2026-10-08)
+v1.0.0 (versionCode 1) is live on Google Play. **v1.1.0 (versionCode 2) is built in this repo**: three new hub activities — Breathing Buddy (Balloon 4/6, Flower & Candle 3/5, Box 4-4-4; session mode `breathing`, pattern in `sound`), Bubble Pop (mode `bubbles`, touch rhythm like the canvas) and Feelings Check-in (mode `feeling`, face id in `sound`, no duration; counted on the Progress tab and in the OT PDF). Four more loops (brown, fan, heartbeat, musicbox), five more routine templates (Prayer Time, Nap Time, Visiting Family, Playground, Wash Hands) and 11 more Noto pictograms. The hub grid scrolls when seven cards don't fit. Tests: 55 host tests.

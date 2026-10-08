@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/content.dart';
 import '../../core/theme.dart';
 import '../../services/report.dart';
 import '../../services/stats.dart';
@@ -109,8 +110,8 @@ class _ProgressTabState extends ConsumerState<ProgressTab> {
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Text(
-              'Nothing recorded yet in this period. Time spent on the Calming Canvas and Soothing Sounds, '
-              'and routine steps, will appear here.',
+              'Nothing recorded yet in this period. Time spent on the Calming Canvas, Soothing Sounds, '
+              'Breathing Buddy and Bubble Pop, routine steps and feelings check-ins will appear here.',
               style: TextStyle(color: SC.textDim, fontSize: 16),
             ),
           ),
@@ -170,6 +171,35 @@ class _ProgressTabState extends ConsumerState<ProgressTab> {
                     subtitle: Text(st.touchRhythms.entries.map((e) => '${rhythmNames[e.key]}: ${e.value}').join(' · ')),
                   ),
               ],
+            ),
+          ),
+        ],
+        if (st.feelingsTotal > 0) ...[
+          const SectionTitle('Feelings check-ins'),
+          const Text(
+            'What the child tapped on "How do I feel?". A pattern over weeks is more telling than one day.',
+            style: TextStyle(color: SC.textDim),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            key: const ValueKey('feelings_card'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  for (final f in feelings)
+                    Expanded(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 40, child: Image.asset(iconAsset(f.icon))),
+                          const SizedBox(height: 4),
+                          Text('${st.feelings[f.id] ?? 0}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          Text(f.label, style: const TextStyle(color: SC.textDim, fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
