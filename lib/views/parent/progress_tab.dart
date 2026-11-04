@@ -111,7 +111,7 @@ class _ProgressTabState extends ConsumerState<ProgressTab> {
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Text(
               'Nothing recorded yet in this period. Time spent on the Calming Canvas, Soothing Sounds, '
-              'Breathing Buddy and Bubble Pop, routine steps and feelings check-ins will appear here.',
+              'Breathing Buddy and Bubble Pop, routine steps, feelings check-ins, lessons and stories will appear here.',
               style: TextStyle(color: SC.textDim, fontSize: 16),
             ),
           ),
@@ -202,6 +202,33 @@ class _ProgressTabState extends ConsumerState<ProgressTab> {
               ),
             ),
           ),
+        ],
+        if (st.learning.isNotEmpty || child.lessonsDone.isNotEmpty) ...[
+          const SectionTitle('Learning'),
+          Text(
+            'Learn with Sammy: ${child.lessonsDone.length} of ${ref.watch(learningProvider).chapters.length} chapters '
+            'finished so far. In this period: ${st.lessonsFinished} chapters and ${st.storiesFinished} Picture Stories '
+            'read to the end.',
+            key: const ValueKey('learning_summary'),
+            style: const TextStyle(color: SC.textDim),
+          ),
+          const SizedBox(height: 8),
+          if (st.learning.isNotEmpty)
+            Card(
+              key: const ValueKey('learning_card'),
+              child: Column(
+                children: [
+                  for (final l in st.learning.take(8))
+                    ListTile(
+                      leading: Icon(l.isStory ? Icons.auto_stories_rounded : Icons.menu_book_rounded,
+                          color: l.isStory ? SC.blue : SC.sand),
+                      title: Text(l.title),
+                      subtitle: Text(l.isStory ? 'Picture Story' : 'Learn with Sammy'),
+                      trailing: Text('${l.finished}/${l.visits} to the end'),
+                    ),
+                ],
+              ),
+            ),
         ],
         if (st.routines.isNotEmpty) ...[
           const SectionTitle('Routines'),

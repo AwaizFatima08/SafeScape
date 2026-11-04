@@ -20,6 +20,15 @@ class RoutineSummary {
   RoutineSummary(this.title, this.runs, this.finished, this.stepsDone, this.stepsTotal);
 }
 
+/// One Learn with Sammy chapter or Picture Story in the period (v1.2).
+class LearningItem {
+  final String title;
+  final bool isStory;
+  final int visits;
+  final int finished;
+  LearningItem(this.title, this.isStory, this.visits, this.finished);
+}
+
 class ChildStats {
   final DateTime from;
   final DateTime to;
@@ -45,6 +54,9 @@ class ChildStats {
   /// Feelings Check-in picks in the period, by feeling id (calm, happy, sad, upset).
   final Map<String, int> feelings;
 
+  /// Lessons and stories, most visited first.
+  final List<LearningItem> learning;
+
   ChildStats({
     required this.from,
     required this.to,
@@ -61,6 +73,7 @@ class ChildStats {
     required this.touchRhythms,
     required this.routines,
     this.feelings = const {},
+    this.learning = const [],
   });
 
   int get calmMinutes => (calmSeconds / 60).round();
@@ -70,7 +83,10 @@ class ChildStats {
 
   int get feelingsTotal => feelings.values.fold(0, (a, b) => a + b);
 
-  bool get isEmpty => calmSessions == 0 && routineRuns == 0 && feelingsTotal == 0;
+  int get lessonsFinished => learning.where((l) => !l.isStory).fold(0, (a, l) => a + l.finished);
+  int get storiesFinished => learning.where((l) => l.isStory).fold(0, (a, l) => a + l.finished);
+
+  bool get isEmpty => calmSessions == 0 && routineRuns == 0 && feelingsTotal == 0 && learning.isEmpty;
 }
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -99,6 +115,7 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
   final rhythm = <String, int>{};
   final routineMap = <String, List<SensorySession>>{};
   final feel = <String, int>{};
+  final learn = <(String, bool), (int, int)>{};
 
   for (final s in sessions) {
     if (s.isCalming) {
@@ -132,6 +149,11 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
       _add(modes, 'Wait Timer', s.durationSeconds);
     } else if (s.mode == 'feeling' && s.sound != null) {
       feel[s.sound!] = (feel[s.sound!] ?? 0) + 1;
+    } else if (s.mode == 'lesson' || s.mode == 'story') {
+      final key = (s.routineTitle ?? (s.mode == 'story' ? 'Picture Story' : 'Lesson'), s.mode == 'story');
+      final v = learn[key] ?? (0, 0);
+      learn[key] = (v.$1 + 1, v.$2 + (s.isFinished ? 1 : 0));
+      _add(modes, s.mode == 'story' ? 'Story: ${key.$1}' : 'Lesson: ${key.$1}', s.durationSeconds);
     }
   }
 
@@ -168,6 +190,9 @@ ChildStats computeStats(List<SensorySession> all, {int days = 7, DateTime? now})
     touchRhythms: rhythm,
     routines: routines,
     feelings: feel,
+    learning: [
+      for (final e in learn.entries) LearningItem(e.key.$1, e.key.$2, e.value.$1, e.value.$2),
+    ]..sort((a, b) => b.visits.compareTo(a.visits)),
   );
 }
 

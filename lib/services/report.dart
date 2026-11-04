@@ -145,6 +145,18 @@ Future<Uint8List> buildReport({
         table(['Routine', 'Runs', 'Finished', 'Steps done'], [
           for (final r in st.routines) [r.title, '${r.runs}', '${r.finished}', '${r.stepsDone} of ${r.stepsTotal}'],
         ]),
+        if (st.learning.isNotEmpty || child.lessonsDone.isNotEmpty) ...[
+          h('Learning: Learn with Sammy and Picture Stories'),
+          pw.Text(
+            'Calm Skills chapters finished so far: ${child.lessonsDone.length}. In this period: '
+            '${st.lessonsFinished} chapters and ${st.storiesFinished} stories read to the end.',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.SizedBox(height: 6),
+          table(['Lesson or story', 'Type', 'Visits', 'Read to the end'], [
+            for (final l in st.learning) [l.title, l.isStory ? 'Story' : 'Lesson', '${l.visits}', '${l.finished}'],
+          ]),
+        ],
         h('Current sensory settings'),
         pw.Text(
           [

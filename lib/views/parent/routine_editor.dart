@@ -1,18 +1,16 @@
 // Edit one routine: title, cover picture, and steps (title, picture or photo,
 // micro-story), reorderable. Photos stay on the device (L6).
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../core/content.dart';
 import '../../core/theme.dart';
 import '../../models/models.dart';
 import '../../state/providers.dart';
 import '../../widgets/common.dart';
+import '../../widgets/photos.dart';
 
 class RoutineEditor extends ConsumerStatefulWidget {
   final Routine routine;
@@ -219,14 +217,8 @@ class _StepEditorState extends State<_StepEditor> {
 
   Future<void> _pickPhoto(ImageSource source) async {
     try {
-      final x = await ImagePicker().pickImage(source: source, maxWidth: 900, maxHeight: 900, imageQuality: 82);
-      if (x == null) return;
-      final dir = await getApplicationSupportDirectory();
-      final folder = Directory('${dir.path}/photos');
-      await folder.create(recursive: true);
-      final dest = File('${folder.path}/${newId('photo')}.jpg');
-      await File(x.path).copy(dest.path);
-      setState(() => _photo = dest.path);
+      final path = await pickLocalPhoto(source);
+      if (path != null) setState(() => _photo = path);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not add that photo.')));

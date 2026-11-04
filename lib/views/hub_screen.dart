@@ -14,7 +14,9 @@ import 'bubbles_screen.dart';
 import 'feelings_screen.dart';
 import 'flow_canvas_screen.dart';
 import 'parent/parent_dashboard.dart';
+import 'lessons_screen.dart';
 import 'routines_screen.dart';
+import 'stories_screen.dart';
 import 'sounds_screen.dart';
 import 'wait_timer_screen.dart';
 
@@ -96,6 +98,22 @@ class HubScreen extends ConsumerWidget {
                             icon: Icons.view_agenda_rounded,
                             color: SC.mint,
                             onTap: () => open(const RoutinesScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_lessons'),
+                            title: 'Learn with Sammy',
+                            subtitle: 'Short picture lessons about feelings and calm.',
+                            icon: Icons.menu_book_rounded,
+                            color: SC.sand,
+                            onTap: () => open(const LessonsScreen()),
+                          ),
+                          _HubCard(
+                            key: const ValueKey('card_stories'),
+                            title: 'Picture Stories',
+                            subtitle: 'Stories about new places and big days.',
+                            icon: Icons.auto_stories_rounded,
+                            color: SC.blue,
+                            onTap: () => open(const StoriesScreen()),
                           ),
                           _HubCard(
                             key: const ValueKey('card_sounds'),

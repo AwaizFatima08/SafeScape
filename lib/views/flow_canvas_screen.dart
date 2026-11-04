@@ -362,9 +362,12 @@ class _BottomBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [for (final p in palettes) _chip(p)],
     );
+    // Four 72 dp colour targets plus margins need ~324 dp; on very narrow
+    // phones (e.g. 320 dp) the bar's own margins shrink, never the targets.
+    final narrow = MediaQuery.sizeOf(context).width < 4 * kTouch + 40;
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-      padding: const EdgeInsets.all(6),
+      margin: EdgeInsets.fromLTRB(narrow ? 6 : 12, 4, narrow ? 6 : 12, 12),
+      padding: EdgeInsets.all(narrow ? 2 : 6),
       decoration: BoxDecoration(color: SC.slate2, borderRadius: BorderRadius.circular(kRadius)),
       child: LayoutBuilder(
         builder: (context, c) {

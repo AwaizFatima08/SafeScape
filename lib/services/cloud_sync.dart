@@ -17,7 +17,8 @@ class CloudSnapshot {
   final List<ChildProfile> children;
   final List<Routine> routines;
   final List<SensorySession> sessions;
-  CloudSnapshot(this.children, this.routines, this.sessions);
+  final List<PictureStory> stories;
+  CloudSnapshot(this.children, this.routines, this.sessions, [this.stories = const []]);
 }
 
 abstract class CloudSync extends ChangeNotifier {
@@ -35,6 +36,8 @@ abstract class CloudSync extends ChangeNotifier {
   void deleteChild(String childId);
   void upsertRoutine(Routine r);
   void deleteRoutine(Routine r);
+  void upsertStory(PictureStory s);
+  void deleteStory(PictureStory s);
   void upsertSession(SensorySession s);
 
   /// Uploads everything (used when backup is switched on or after a merge).
@@ -83,6 +86,10 @@ class OfflineCloudSync extends CloudSync {
   void upsertRoutine(Routine r) {}
   @override
   void deleteRoutine(Routine r) {}
+  @override
+  void upsertStory(PictureStory s) {}
+  @override
+  void deleteStory(PictureStory s) {}
   @override
   void upsertSession(SensorySession s) {}
   @override
@@ -169,6 +176,7 @@ class FirebaseCloudSync extends CloudSync {
     final doc = _children(_root!).doc(childId);
     await _deleteCollection(doc.collection('routines'));
     await _deleteCollection(doc.collection('sessions'));
+    await _deleteCollection(doc.collection('stories'));
     await doc.delete();
   });
 
@@ -180,6 +188,16 @@ class FirebaseCloudSync extends CloudSync {
   @override
   void deleteRoutine(Routine r) => _write(
     () => _children(_root!).doc(r.childId).collection('routines').doc(r.id).delete(),
+  );
+
+  @override
+  void upsertStory(PictureStory s) => _write(
+    () => _children(_root!).doc(s.childId).collection('stories').doc(s.id).set(s.toJson(forCloud: true)),
+  );
+
+  @override
+  void deleteStory(PictureStory s) => _write(
+    () => _children(_root!).doc(s.childId).collection('stories').doc(s.id).delete(),
   );
 
   @override
@@ -212,6 +230,9 @@ class FirebaseCloudSync extends CloudSync {
       for (final r in data.routines) {
         await add(_children(root).doc(r.childId).collection('routines').doc(r.id), r.toJson(forCloud: true));
       }
+      for (final st in data.stories) {
+        await add(_children(root).doc(st.childId).collection('stories').doc(st.id), st.toJson(forCloud: true));
+      }
       for (final s in data.sessions) {
         await add(_children(root).doc(s.childId).collection('sessions').doc(s.id), s.toJson());
       }
@@ -230,14 +251,17 @@ class FirebaseCloudSync extends CloudSync {
       final children = <ChildProfile>[];
       final routines = <Routine>[];
       final sessions = <SensorySession>[];
+      final stories = <PictureStory>[];
       for (final k in kids.docs) {
         children.add(ChildProfile.fromJson(k.data()));
         final rs = await k.reference.collection('routines').get();
         routines.addAll(rs.docs.map((d) => Routine.fromJson(d.data())));
         final ss = await k.reference.collection('sessions').get();
         sessions.addAll(ss.docs.map((d) => SensorySession.fromJson(d.data())));
+        final st = await k.reference.collection('stories').get();
+        stories.addAll(st.docs.map((d) => PictureStory.fromJson(d.data())));
       }
-      return CloudSnapshot(children, routines, sessions);
+      return CloudSnapshot(children, routines, sessions, stories);
     } catch (e) {
       debugPrint('pullAll failed: $e');
       return null;
@@ -329,6 +353,7 @@ class FirebaseCloudSync extends CloudSync {
       for (final k in kids.docs) {
         await _deleteCollection(k.reference.collection('routines'));
         await _deleteCollection(k.reference.collection('sessions'));
+        await _deleteCollection(k.reference.collection('stories'));
         await k.reference.delete();
       }
       await root.delete();

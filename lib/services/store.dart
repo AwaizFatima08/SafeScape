@@ -48,6 +48,7 @@ class AppStore extends ChangeNotifier {
   void _repair() {
     final ids = data.children.map((c) => c.id).toSet();
     data.routines.removeWhere((r) => !ids.contains(r.childId));
+    data.stories.removeWhere((st) => !ids.contains(st.childId));
     if (data.settings.activeChildId == null || !ids.contains(data.settings.activeChildId)) {
       data.settings.activeChildId = data.children.isEmpty ? null : data.children.first.id;
     }
@@ -64,6 +65,16 @@ class AppStore extends ChangeNotifier {
       if (c.id == id) return c;
     }
     return data.children.isEmpty ? null : data.children.first;
+  }
+
+  List<PictureStory> storiesFor(String childId) =>
+      data.stories.where((s) => s.childId == childId).toList();
+
+  PictureStory? storyById(String id) {
+    for (final s in data.stories) {
+      if (s.id == id) return s;
+    }
+    return null;
   }
 
   List<Routine> routinesFor(String childId) =>
@@ -182,6 +193,7 @@ class AppStore extends ChangeNotifier {
   void deleteChild(String id) {
     data.children.removeWhere((c) => c.id == id);
     data.routines.removeWhere((r) => r.childId == id);
+    data.stories.removeWhere((s) => s.childId == id);
     data.sessions.removeWhere((s) => s.childId == id);
     _repair();
     _changed();
@@ -209,6 +221,38 @@ class AppStore extends ChangeNotifier {
     data.routines.removeWhere((x) => x.id == r.id);
     _changed();
     if (_mirror) cloud.deleteRoutine(r);
+  }
+
+  // ---------- Learn with Sammy and Picture Stories (v1.2) ----------
+
+  /// Marks a chapter finished for the child (its star on the chapter list).
+  void completeLesson(ChildProfile child, String chapterId) {
+    if (child.lessonsDone.add(chapterId)) updateChild(child);
+  }
+
+  void upsertStory(PictureStory st) {
+    st.updatedAt = DateTime.now();
+    final i = data.stories.indexWhere((x) => x.id == st.id);
+    if (i >= 0) {
+      data.stories[i] = st;
+    } else {
+      data.stories.add(st);
+    }
+    _changed();
+    if (_mirror) cloud.upsertStory(st);
+  }
+
+  void deleteStory(PictureStory st) {
+    data.stories.removeWhere((x) => x.id == st.id);
+    for (final p in st.pages) {
+      final path = p.photoPath;
+      if (path == null) continue;
+      try {
+        File(path).deleteSync();
+      } catch (_) {}
+    }
+    _changed();
+    if (_mirror) cloud.deleteStory(st);
   }
 
   /// Clears every step so the routine can be run again.
@@ -296,8 +340,23 @@ class AppStore extends ChangeNotifier {
       final i = data.children.indexWhere((x) => x.id == c.id);
       if (i < 0) {
         data.children.add(c);
-      } else if (c.updatedAt.isAfter(data.children[i].updatedAt)) {
-        data.children[i] = c;
+      } else {
+        // Finished chapters are a union: a star earned on either device stays.
+        final stars = {...data.children[i].lessonsDone, ...c.lessonsDone};
+        if (c.updatedAt.isAfter(data.children[i].updatedAt)) data.children[i] = c;
+        data.children[i].lessonsDone = stars;
+      }
+    }
+    for (final st in snap.stories) {
+      final i = data.stories.indexWhere((x) => x.id == st.id);
+      if (i < 0) {
+        data.stories.add(st);
+      } else if (st.updatedAt.isAfter(data.stories[i].updatedAt)) {
+        final old = data.stories[i];
+        for (final p in st.pages) {
+          p.photoPath ??= find(old.pages, (o) => o.id == p.id)?.photoPath;
+        }
+        data.stories[i] = st;
       }
     }
     for (final r in snap.routines) {
@@ -327,15 +386,17 @@ class AppStore extends ChangeNotifier {
 
   /// Erases everything on this device (sign-out / account deletion).
   Future<void> wipe() async {
-    for (final r in data.routines) {
-      for (final s in r.steps) {
-        final p = s.photoPath;
-        if (p != null) {
-          try {
-            await File(p).delete();
-          } catch (_) {}
-        }
-      }
+    final photos = [
+      for (final r in data.routines)
+        for (final s in r.steps) s.photoPath,
+      for (final st in data.stories)
+        for (final p in st.pages) p.photoPath,
+    ];
+    for (final p in photos) {
+      if (p == null) continue;
+      try {
+        await File(p).delete();
+      } catch (_) {}
     }
     data = AppData();
     _changed();

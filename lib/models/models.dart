@@ -112,6 +112,9 @@ class ChildProfile {
   String ageGroup;
   String avatar;
   SensoryProfile sensory;
+
+  /// Learn with Sammy chapters this child has finished (chapter ids).
+  Set<String> lessonsDone;
   final DateTime createdAt;
   DateTime updatedAt;
 
@@ -121,9 +124,11 @@ class ChildProfile {
     required this.ageGroup,
     this.avatar = 'turtle_sammy',
     SensoryProfile? sensory,
+    Set<String>? lessonsDone,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : sensory = sensory ?? SensoryProfile(),
+       lessonsDone = lessonsDone ?? <String>{},
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -133,6 +138,7 @@ class ChildProfile {
     'age_group': ageGroup,
     'avatar_type': avatar,
     'sensory_profile': sensory.toJson(),
+    'lessons_done': lessonsDone.toList()..sort(),
     'created_at': _iso(createdAt),
     'updated_at': _iso(updatedAt),
   };
@@ -145,6 +151,10 @@ class ChildProfile {
     sensory: SensoryProfile.fromJson(
       (j['sensory_profile'] as Map?)?.cast<String, dynamic>(),
     ),
+    lessonsDone: {
+      for (final e in (j['lessons_done'] is List ? j['lessons_done'] as List : const []))
+        if (e is String) e,
+    },
     createdAt: _date(j['created_at']),
     updatedAt: _date(j['updated_at']),
   );
@@ -260,12 +270,82 @@ class Routine {
   );
 }
 
+/// One page of a parent-written Picture Story.
+class StoryPage {
+  final String id;
+  String text;
+  String iconKey;
+  String? photoPath; // local only; never uploaded (L6)
+
+  StoryPage({required this.id, required this.text, required this.iconKey, this.photoPath});
+
+  Map<String, dynamic> toJson({bool forCloud = false}) => {
+    'id': id,
+    'text': text,
+    'icon_key': iconKey,
+    if (!forCloud && photoPath != null) 'photo_path': photoPath,
+  };
+
+  factory StoryPage.fromJson(Map<String, dynamic> j) => StoryPage(
+    id: _str(j['id'], newId('page')),
+    text: _str(j['text'], ''),
+    iconKey: _str(j['icon_key'], 'star'),
+    photoPath: j['photo_path'] is String ? j['photo_path'] as String : null,
+  );
+}
+
+/// A Picture Story a grown-up wrote for one child (v1.2, scope V5). Built-in
+/// stories live in assets/content/stories.json instead.
+class PictureStory {
+  final String id;
+  final String childId;
+  String title;
+  String iconKey;
+  List<StoryPage> pages;
+  final DateTime createdAt;
+  DateTime updatedAt;
+
+  PictureStory({
+    required this.id,
+    required this.childId,
+    required this.title,
+    required this.iconKey,
+    required this.pages,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
+
+  Map<String, dynamic> toJson({bool forCloud = false}) => {
+    'story_id': id,
+    'child_id': childId,
+    'title': title,
+    'icon_key': iconKey,
+    'pages': [for (final p in pages) p.toJson(forCloud: forCloud)],
+    'created_at': _iso(createdAt),
+    'updated_at': _iso(updatedAt),
+  };
+
+  factory PictureStory.fromJson(Map<String, dynamic> j) => PictureStory(
+    id: _str(j['story_id'], newId('story')),
+    childId: _str(j['child_id'], ''),
+    title: _str(j['title'], 'My story'),
+    iconKey: _str(j['icon_key'], 'story'),
+    pages: [
+      for (final p in (j['pages'] is List ? j['pages'] as List : const []))
+        if (p is Map) StoryPage.fromJson(p.cast<String, dynamic>()),
+    ],
+    createdAt: _date(j['created_at']),
+    updatedAt: _date(j['updated_at']),
+  );
+}
+
 /// One use of a mode: a Flow Canvas visit, a sound played, a routine run or a
 /// wait timer. Only durations and choices are stored, never raw touches.
 class SensorySession {
   final String id;
   final String childId;
-  final String mode; // flow_canvas | sounds | routine | wait_timer | breathing | bubbles | feeling
+  final String mode; // flow_canvas | sounds | routine | wait_timer | breathing | bubbles | feeling | lesson | story
   final DateTime start;
   int durationSeconds;
   String? palette;
@@ -296,6 +376,12 @@ class SensorySession {
   /// Self-regulation time: the canvas, sounds, breathing and bubbles.
   bool get isCalming => mode == 'flow_canvas' || mode == 'sounds' || mode == 'breathing' || mode == 'bubbles';
 
+  /// Routine steps, lesson cards or story pages: done out of total.
+  bool get _hasSteps => mode == 'routine' || mode == 'lesson' || mode == 'story';
+
+  /// A routine, lesson or story seen right to the end.
+  bool get isFinished => stepsTotal > 0 && stepsDone >= stepsTotal;
+
   Map<String, dynamic> toJson() => {
     'session_id': id,
     'child_id': childId,
@@ -307,8 +393,8 @@ class SensorySession {
     if (touchRhythm != null) 'avg_touch_frequency': touchRhythm,
     if (routineId != null) 'routine_id': routineId,
     if (routineTitle != null) 'routine_title': routineTitle,
-    if (mode == 'routine') 'steps_done': stepsDone,
-    if (mode == 'routine') 'steps_total': stepsTotal,
+    if (_hasSteps) 'steps_done': stepsDone,
+    if (_hasSteps) 'steps_total': stepsTotal,
     'updated_at': _iso(updatedAt),
   };
 
@@ -371,16 +457,19 @@ class AppData {
   List<ChildProfile> children;
   List<Routine> routines;
   List<SensorySession> sessions;
+  List<PictureStory> stories;
 
   AppData({
     GlobalSettings? settings,
     List<ChildProfile>? children,
     List<Routine>? routines,
     List<SensorySession>? sessions,
+    List<PictureStory>? stories,
   }) : settings = settings ?? GlobalSettings(),
        children = children ?? [],
        routines = routines ?? [],
-       sessions = sessions ?? [];
+       sessions = sessions ?? [],
+       stories = stories ?? [];
 
   Map<String, dynamic> toJson() => {
     'version': 1,
@@ -388,6 +477,7 @@ class AppData {
     'children': [for (final c in children) c.toJson()],
     'visual_routines': [for (final r in routines) r.toJson()],
     'sensory_sessions': [for (final s in sessions) s.toJson()],
+    'picture_stories': [for (final s in stories) s.toJson()],
   };
 
   factory AppData.fromJson(Map<String, dynamic> j) {
@@ -402,6 +492,7 @@ class AppData {
       children: list('children', ChildProfile.fromJson),
       routines: list('visual_routines', Routine.fromJson),
       sessions: list('sensory_sessions', SensorySession.fromJson),
+      stories: list('picture_stories', PictureStory.fromJson),
     );
   }
 }

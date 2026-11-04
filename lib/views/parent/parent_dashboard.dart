@@ -10,6 +10,7 @@ import 'family_tab.dart';
 import 'progress_tab.dart';
 import 'routines_tab.dart';
 import 'sensory_tab.dart';
+import 'stories_tab.dart';
 
 class ParentDashboard extends ConsumerWidget {
   const ParentDashboard({super.key});
@@ -20,7 +21,7 @@ class ParentDashboard extends ConsumerWidget {
     final child = store.activeChild;
     if (child == null) return const Scaffold();
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Grown-ups'),
@@ -55,13 +56,14 @@ class ParentDashboard extends ConsumerWidget {
               Tab(key: ValueKey('tab_progress'), text: 'Progress'),
               Tab(key: ValueKey('tab_sensory'), text: 'Sensory'),
               Tab(key: ValueKey('tab_routines'), text: 'Routines'),
+              Tab(key: ValueKey('tab_stories'), text: 'Stories'),
               Tab(key: ValueKey('tab_family'), text: 'Children'),
               Tab(key: ValueKey('tab_account'), text: 'Backup & account'),
             ],
           ),
         ),
         body: const TabBarView(
-          children: [ProgressTab(), SensoryTab(), RoutinesTab(), FamilyTab(), AccountTab()],
+          children: [ProgressTab(), SensoryTab(), RoutinesTab(), StoriesTab(), FamilyTab(), AccountTab()],
         ),
       ),
     );

@@ -7,9 +7,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:safescape/app.dart';
 import 'package:safescape/main.dart' as app;
 import 'package:safescape/state/providers.dart';
@@ -147,5 +147,11 @@ void main() {
       FirebaseFirestore.instance.collection('users/someone-else/children').get(const GetOptions(source: Source.server)),
       throwsA(isA<FirebaseException>()),
     );
+
+    // The project holds real families' data: delete this test's own anonymous
+    // account and its documents (and nothing else).
+    final cloud = ProviderScope.containerOf(t.element(find.byType(SafeScapeApp))).read(cloudProvider);
+    expect(await cloud.deleteAccount(), isNull);
+    expect(FirebaseAuth.instance.currentUser, isNull);
   });
 }

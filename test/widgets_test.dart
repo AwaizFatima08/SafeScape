@@ -28,8 +28,11 @@ Future<void> tapKey(WidgetTester t, String key) async {
   await t.pump(const Duration(milliseconds: 300));
   if (f.evaluate().isEmpty) {
     // Lazily built list item: scroll the main vertical list until it exists.
-    await t.scrollUntilVisible(f, 250,
-        scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last);
+    await t.scrollUntilVisible(
+      f,
+      250,
+      scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last,
+    );
   }
   // Only scroll when the target is off-screen: ensureVisible also moves
   // horizontal ancestors (e.g. a TabBarView) and can switch tabs.
@@ -210,55 +213,71 @@ void main() {
     }
   });
 
-  testWidgets('Galaxy A12 with large text (340 dp, x1.3): nothing is truncated', (t) async {
-    t.view.physicalSize = const Size(720, 1600);
-    t.view.devicePixelRatio = 720 / 340;
-    // The A12's status bar (~24 dp) and 3-button navigation bar (~48 dp).
-    t.view.padding = const FakeViewPadding(top: 24 * 720 / 340, bottom: 48 * 720 / 340);
-    t.view.viewPadding = const FakeViewPadding(top: 24 * 720 / 340, bottom: 48 * 720 / 340);
-    t.platformDispatcher.textScaleFactorTestValue = 1.3;
-    addTearDown(t.view.reset);
-    addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
-    final env = await t.runAsync(() => makeEnv());
-    final child = env!.store.addChild(alias: 'Maya', ageGroup: '5-7');
-    await t.pumpWidget(env.app());
-    await settle(t);
+  // Real test phones: Galaxy A12 (340 dp, text x1.3) and OPPO CPH2743 (320 dp, x1.15).
+  for (final (name, px, h, dp, text) in [
+    ('Galaxy A12', 720.0, 1600.0, 340.0, 1.3),
+    ('OPPO CPH2743', 1080.0, 2372.0, 320.0, 1.15),
+  ]) {
+    testWidgets('$name ($dp dp, text x$text): nothing is truncated', (t) async {
+      t.view.physicalSize = Size(px, h);
+      t.view.devicePixelRatio = px / dp;
+      // Status bar (~24 dp) and 3-button navigation bar (~48 dp).
+      t.view.padding = FakeViewPadding(top: 24 * px / dp, bottom: 48 * px / dp);
+      t.view.viewPadding = FakeViewPadding(top: 24 * px / dp, bottom: 48 * px / dp);
+      t.platformDispatcher.textScaleFactorTestValue = text;
+      addTearDown(t.view.reset);
+      addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+      final env = await t.runAsync(() => makeEnv());
+      final child = env!.store.addChild(alias: 'Maya', ageGroup: '5-7');
+      await t.pumpWidget(env.app());
+      await settle(t);
 
-    void noTruncation(String where) {
-      for (final p in t.allRenderObjects.whereType<RenderParagraph>()) {
-        expect(p.didExceedMaxLines, isFalse, reason: '$where: "${p.text.toPlainText()}" is cut off');
+      void noTruncation(String where) {
+        for (final p in t.allRenderObjects.whereType<RenderParagraph>()) {
+          expect(p.didExceedMaxLines, isFalse, reason: '$where: "${p.text.toPlainText()}" is cut off');
+        }
+        expect(t.takeException(), isNull, reason: where);
       }
-      expect(t.takeException(), isNull, reason: where);
-    }
 
-    noTruncation('hub');
-    await tapKey(t, 'card_routines');
-    noTruncation('routines');
-    final doctor = env.store.routinesFor(child.id).firstWhere((r) => r.title == 'Visiting the Doctor');
-    await tapKey(t, 'routine_${doctor.id}');
-    noTruncation('routine player');
-    await tapKey(t, 'step_0');
-    await tapKey(t, 'step_1');
-    noTruncation('routine player, step 3 current');
-    await tapKey(t, 'home');
-    await tapKey(t, 'card_canvas');
-    noTruncation('canvas');
-    for (final p in ['lavender', 'mint', 'sand', 'blue']) {
-      expect(t.getSize(find.byKey(ValueKey('palette_$p'))).width, greaterThanOrEqualTo(72), reason: p);
-    }
-    await tapKey(t, 'home');
-    await tapKey(t, 'card_sounds');
-    noTruncation('sounds');
-    await tapKey(t, 'home');
-    await tapKey(t, 'card_wait');
-    noTruncation('wait timer');
-  });
+      noTruncation('hub');
+      await tapKey(t, 'card_routines');
+      noTruncation('routines');
+      final doctor = env.store.routinesFor(child.id).firstWhere((r) => r.title == 'Visiting the Doctor');
+      await tapKey(t, 'routine_${doctor.id}');
+      noTruncation('routine player');
+      await tapKey(t, 'step_0');
+      await tapKey(t, 'step_1');
+      noTruncation('routine player, step 3 current');
+      await tapKey(t, 'home');
+      await tapKey(t, 'card_canvas');
+      noTruncation('canvas');
+      for (final p in ['lavender', 'mint', 'sand', 'blue']) {
+        expect(t.getSize(find.byKey(ValueKey('palette_$p'))).width, greaterThanOrEqualTo(72), reason: p);
+      }
+      await tapKey(t, 'home');
+      await tapKey(t, 'card_sounds');
+      noTruncation('sounds');
+      await tapKey(t, 'home');
+      await tapKey(t, 'card_wait');
+      noTruncation('wait timer');
+      for (final card in ['card_breathing', 'card_bubbles', 'card_feelings']) {
+        await tapKey(t, 'home');
+        await tapKey(t, card);
+        noTruncation(card);
+      }
+      await tapKey(t, 'feel_sad');
+      noTruncation('feelings answer');
+    });
+  }
 
   for (final action in ['sign_out', 'delete_all']) {
     testWidgets('$action returns to the welcome page (not a blank screen)', (t) async {
       phone(t);
       final cloud = FirebaseCloudSync(
-        auth: MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'u1', email: 'p@example.com', isAnonymous: false)),
+        auth: MockFirebaseAuth(
+          signedIn: true,
+          mockUser: MockUser(uid: 'u1', email: 'p@example.com', isAnonymous: false),
+        ),
         db: FakeFirebaseFirestore(),
       );
       final env = await t.runAsync(() => makeEnv(cloud: cloud));
@@ -353,7 +372,7 @@ void main() {
     await t.tap(find.byKey(const ValueKey('new_blank')));
     for (var i = 0; i < 4; i++) {
       await t.pump(const Duration(milliseconds: 300));
-      }
+    }
     await t.enterText(find.byKey(const ValueKey('routine_title')), 'Swimming');
     await tapKey(t, 'add_step');
     await t.enterText(find.byKey(const ValueKey('step_title')), 'Put on goggles');
@@ -393,10 +412,26 @@ void main() {
     phone(t);
     final env = await t.runAsync(() => makeEnv());
     final c = env!.store.addChild(alias: 'A', ageGroup: '5-7');
-    env.store.logSession(SensorySession(
-        id: newId('s'), childId: c.id, mode: 'flow_canvas', start: DateTime.now(), durationSeconds: 600, palette: 'mint'));
-    env.store.logSession(SensorySession(
-        id: newId('s'), childId: c.id, mode: 'sounds', start: DateTime.now(), durationSeconds: 300, sound: 'rain'));
+    env.store.logSession(
+      SensorySession(
+        id: newId('s'),
+        childId: c.id,
+        mode: 'flow_canvas',
+        start: DateTime.now(),
+        durationSeconds: 600,
+        palette: 'mint',
+      ),
+    );
+    env.store.logSession(
+      SensorySession(
+        id: newId('s'),
+        childId: c.id,
+        mode: 'sounds',
+        start: DateTime.now(),
+        durationSeconds: 300,
+        sound: 'rain',
+      ),
+    );
     await t.pumpWidget(env.app());
     await settle(t);
     await passGate(t);
@@ -429,8 +464,11 @@ void main() {
     final c = env!.store.addChild(alias: 'B', ageGroup: '5-7');
     await t.pumpWidget(env.app());
     await settle(t);
-    await t.dragUntilVisible(find.byKey(const ValueKey('card_breathing')), find.byKey(const ValueKey('hub_grid')),
-        const Offset(0, -120));
+    await t.dragUntilVisible(
+      find.byKey(const ValueKey('card_breathing')),
+      find.byKey(const ValueKey('hub_grid')),
+      const Offset(0, -120),
+    );
     await tapKey(t, 'card_breathing');
     expect(find.text('Breathe in'), findsOneWidget);
     await tapKey(t, 'breath_flower');
@@ -451,8 +489,11 @@ void main() {
     final c = env!.store.addChild(alias: 'B', ageGroup: '5-7');
     await t.pumpWidget(env.app());
     await settle(t);
-    await t.dragUntilVisible(find.byKey(const ValueKey('card_bubbles')), find.byKey(const ValueKey('hub_grid')),
-        const Offset(0, -120));
+    await t.dragUntilVisible(
+      find.byKey(const ValueKey('card_bubbles')),
+      find.byKey(const ValueKey('hub_grid')),
+      const Offset(0, -120),
+    );
     await tapKey(t, 'card_bubbles');
     expect(find.text('Touch a bubble'), findsOneWidget);
     final state = t.state(find.byType(BubblesScreen)) as dynamic;
@@ -477,8 +518,11 @@ void main() {
     final c = env!.store.addChild(alias: 'F', ageGroup: '5-7');
     await t.pumpWidget(env.app());
     await settle(t);
-    await t.dragUntilVisible(find.byKey(const ValueKey('card_feelings')), find.byKey(const ValueKey('hub_grid')),
-        const Offset(0, -120));
+    await t.dragUntilVisible(
+      find.byKey(const ValueKey('card_feelings')),
+      find.byKey(const ValueKey('hub_grid')),
+      const Offset(0, -120),
+    );
     await tapKey(t, 'card_feelings');
     expect(find.text('How do you feel?'), findsOneWidget);
     await tapKey(t, 'feel_sad');

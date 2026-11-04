@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "id": "body_talks",
+      "title": "My Body Talks",
+      "icon": "heart",
+      "color": "lavender",
+      "summary": "Notice what my body feels.",
+      "cards": [
+        {"text": "My body tells me how I feel.", "icon": "turtle"},
+        {"text": "When I am calm, my heart beats slowly and my hands feel soft.", "icon": "face_calm"},
+        {"text": "When I am upset, my heart can beat fast.", "icon": "heart"},
+        {"text": "When I worry, my tummy can feel tight.", "icon": "face_worried"},
+        {"text": "When I am cross, my face can feel hot.", "icon": "face_upset"},
+        {"text": "Listening to my body helps me know what I need.", "icon": "ear"}
+      ],
+      "practice": {
+        "type": "choose",
+        "prompt": "Where do you feel big feelings?",
+        "options": [
+          {"label": "My heart", "icon": "heart"},
+          {"label": "My tummy", "icon": "face_worried"},
+          {"label": "My face", "icon": "face_upset"},
+          {"label": "My hands", "icon": "hand"}
+        ],
+        "reply": "Thank you for telling me. Noticing your body is a great first step."
+      }
+    },
+    {
+      "id": "feeling_names",
+      "title": "Feelings Have Names",
+      "icon": "face_happy",
+      "color": "mint",
+      "summary": "Happy, sad, cross, scared and calm.",
+      "cards": [
+        {"text": "Feelings have names.", "icon": "speech"},
+        {"text": "Happy feels light and smiley.", "icon": "face_happy"},
+        {"text": "Sad can feel heavy. Sometimes I cry.", "icon": "face_sad"},
+        {"text": "Cross can feel hot and big.", "icon": "face_upset"},
+        {"text": "Scared can make me want to hide.", "icon": "face_scared"},
+        {"text": "All feelings are okay. Feelings come and go, like clouds.", "icon": "cloud"}
+      ],
+      "practice": {
+        "type": "choose",
+        "prompt": "Which feeling do you have right now?",
+        "options": [
+          {"label": "Happy", "icon": "face_happy"},
+          {"label": "Calm", "icon": "face_calm"},
+          {"label": "Sad", "icon": "face_sad"},
+          {"label": "Cross", "icon": "face_upset"},
+          {"label": "Scared", "icon": "face_scared"},
+          {"label": "Not sure", "icon": "face_thinking"}
+        ],
+        "reply": "Thank you. It is good to know how you feel. Every feeling is okay."
+      }
+    },
+    {
+      "id": "calm_tools",
+      "title": "My Calm-Down Tools",
+      "icon": "calm",
+      "color": "blue",
+      "summary": "Things that help me feel calm.",
+      "cards": [
+        {"text": "When feelings get big, I can use my calm-down tools.", "icon": "calm"},
+        {"text": "I can breathe slowly, in and out.", "icon": "wind"},
+        {"text": "I can squeeze my hands tight, then let go.", "icon": "muscle"},
+        {"text": "I can hug my soft toy.", "icon": "play"},
+        {"text": "I can sit in a quiet place.", "icon": "quiet"},
+        {"text": "I can count slowly to ten.", "icon": "numbers"}
+      ],
+      "practice": {
+        "type": "squeeze",
+        "prompt": "Press and hold the ball to squeeze. Let go to relax.",
+        "times": 3,
+        "reply": "Squeeze and let go. Your hands feel softer now."
+      }
+    },
+    {
+      "id": "too_loud",
+      "title": "Too Loud, Too Bright",
+      "icon": "headphones",
+      "color": "sand",
+      "summary": "What helps when it is too much.",
+      "cards": [
+        {"text": "Some places are very loud or very bright.", "icon": "loud"},
+        {"text": "Too much noise or light can feel like a lot.", "icon": "face_worried"},
+        {"text": "It is okay to cover my ears or wear headphones.", "icon": "headphones"},
+        {"text": "I can wear a cap or sunglasses when it is bright.", "icon": "sunglasses"},
+        {"text": "I can ask to go somewhere quiet.", "icon": "quiet"},
+        {"text": "I can say: \"It is too loud for me.\"", "icon": "speech"}
+      ],
+      "practice": {
+        "type": "choose",
+        "prompt": "What helps you when it is too much?",
+        "options": [
+          {"label": "Headphones", "icon": "headphones"},
+          {"label": "A quiet place", "icon": "quiet"},
+          {"label": "A hug", "icon": "hug"},
+          {"label": "Sunglasses", "icon": "sunglasses"}
+        ],
+        "reply": "That is a good idea. You know what helps you."
+      }
+    },
+    {
+      "id": "plans_change",
+      "title": "When Plans Change",
+      "icon": "calendar",
+      "color": "lavender",
+      "summary": "Changes can be okay.",
+      "cards": [
+        {"text": "Sometimes plans change.", "icon": "calendar"},
+        {"text": "A change can feel surprising.", "icon": "face_surprised"},
+        {"text": "I can take a slow breath.", "icon": "wind"},
+        {"text": "A grown-up can show me the new plan.", "icon": "family"},
+        {"text": "First and Then pictures help me know what happens next.", "icon": "story"},
+        {"text": "Changes can be okay. I can do it.", "icon": "star"}
+      ],
+      "practice": {
+        "type": "breathe",
+        "prompt": "Let's take three slow breaths together.",
+        "breaths": 3,
+        "reply": "Slow breaths help. You did it."
+      }
+    },
+    {
+      "id": "asking_help",
+      "title": "Asking for Help",
+      "icon": "raise_hand",
+      "color": "mint",
+      "summary": "Everyone needs help sometimes.",
+      "cards": [
+        {"text": "Everyone needs help sometimes.", "icon": "family"},
+        {"text": "I can say: \"Help, please.\"", "icon": "speech"},
+        {"text": "I can point or show a picture.", "icon": "hand"},
+        {"text": "I can go to a grown-up I trust.", "icon": "raise_hand"},
+        {"text": "Grown-ups are happy to help me.", "icon": "hug"}
+      ],
+      "practice": {
+        "type": "choose",
+        "prompt": "Who can you ask for help?",
+        "options": [
+          {"label": "My family", "icon": "family"},
+          {"label": "My teacher", "icon": "teacher"},
+          {"label": "My doctor", "icon": "doctor"},
+          {"label": "A friend", "icon": "wave"}
+        ],
+        "reply": "Yes! They can help you. Asking for help is brave."
+      }
+    },
+    {
+      "id": "waiting_turn",
+      "title": "Waiting My Turn",
+      "icon": "hourglass",
+      "color": "sand",
+      "summary": "Things to do while I wait.",
+      "cards": [
+        {"text": "Sometimes I have to wait.", "icon": "hourglass"},
+        {"text": "Waiting can feel long.", "icon": "waiting"},
+        {"text": "While I wait, I can breathe, count or squeeze my hands.", "icon": "numbers"},
+        {"text": "I can look around and notice things.", "icon": "eyes"},
+        {"text": "My turn will come.", "icon": "star"}
+      ],
+      "practice": {
+        "type": "count",
+        "prompt": "Let's notice things while we wait. Tap a star for each one.",
+        "steps": [
+          {"count": 5, "label": "Look for 5 things you can see", "icon": "eyes"},
+          {"count": 4, "label": "Listen for 4 things you can hear", "icon": "ear"},
+          {"count": 3, "label": "Find 3 things you can touch", "icon": "hand"}
+        ],
+        "reply": "Great noticing! Waiting went by a little faster."
+      }
+    },
+    {
+      "id": "playing_together",
+      "title": "Playing Together",
+      "icon": "puzzle",
+      "color": "blue",
+      "summary": "Saying hello, taking turns, taking breaks.",
+      "cards": [
+        {"text": "Playing with others can be fun.", "icon": "playground"},
+        {"text": "I can say hello or wave.", "icon": "wave"},
+        {"text": "We can take turns. First you, then me.", "icon": "ball"},
+        {"text": "If I need a break, I can say: \"I need a break.\"", "icon": "quiet"},
+        {"text": "It is okay to play alone too.", "icon": "puzzle"}
+      ],
+      "practice": {
+        "type": "choose",
+        "prompt": "What do you like to play?",
+        "options": [
+          {"label": "Ball", "icon": "ball"},
+          {"label": "Puzzles", "icon": "puzzle"},
+          {"label": "Drawing", "icon": "paint"},
+          {"label": "Bubbles", "icon": "bubbles"}
+        ],
+        "reply": "That sounds fun! You can share it with a friend if you like."
+      }
+    }
+  ]
+}

@@ -22,19 +22,25 @@ Everything needed to fill in Play Console for the first upload. Upload file: `re
 Calm sensory play and picture routines for autistic and sensitive children.
 
 ## Full description (≤4000)
-Sensory SafeScape is a quiet, predictable place for autistic and sensory-sensitive children (ages 2–10) to calm down and get ready for what comes next.
+Sensory SafeScape is a quiet, predictable place for autistic and sensory-sensitive children (ages 2–10) to calm down, learn calm skills and get ready for what comes next.
 
 CALMING CANVAS
 Touch and drag anywhere to make soft, glowing waves that drift and fade. Use one finger, both hands or a whole palm. A slow breathing ring (4 seconds in, 6 seconds out) and Sammy the Turtle breathe along with your child.
 
+BREATHING BUDDY, BUBBLE POP AND FEELINGS
+Breathe slowly with Sammy (balloon, flower & candle, or box breathing), pop slow, soft bubbles, or tap a face to say how you feel and get a gentle calming idea.
+
+NEW: LEARN WITH SAMMY
+Eight short picture lessons about calm skills: My Body Talks, Feelings Have Names, My Calm-Down Tools, Too Loud Too Bright, When Plans Change, Asking for Help, Waiting My Turn and Playing Together. Every card is read aloud, and each lesson ends with a gentle practice: three slow breaths, squeeze-and-let-go, a 5-4-3 noticing game, or choosing what helps. There are no wrong answers and no scores, just a star when a lesson is finished.
+
+NEW: PICTURE STORIES
+Twelve calm, first-person stories that help children prepare for real situations: going on an airplane, a new school, a fire drill, a vaccine, guests at home, Eid with family, a power cut, a long car trip, a new baby, thunder, a wedding and losing a game. Grown-ups can write their own stories, or copy one and add photos of the real place.
+
 MY VISUAL ROUTINES
-Break big moments into small picture steps: going to the doctor, the dentist, a haircut, school, bath time, shopping and bedtime are ready to use. A First / Then strip shows what is happening now and what comes next. Each card can read itself aloud with a short, reassuring story ("The doctor listens to my heart. It might feel cold. That is okay."). Finishing a step brings a gentle chime and a small burst of stars.
+Break big moments into small picture steps: going to the doctor, the dentist, a haircut, school, prayer time, bath time and bedtime are ready to use. A First / Then strip shows what is happening now and what comes next, and each card can read itself aloud with a short, reassuring story.
 
-SOOTHING SOUNDS
-Warm hum, soft rain, ocean waves and a marimba lullaby. Every sound is filtered to remove sharp, high pitches, and can fade out slowly at bedtime.
-
-WAIT TIMER
-A soft disc slowly shrinks to show "a few more minutes", with a picture of what comes next. No numbers counting down, no alarm: just one low, gentle note at the end.
+SOOTHING SOUNDS AND WAIT TIMER
+Eight soft sounds, from warm hum and rain to a heartbeat and a music box, all filtered to remove sharp, high pitches, with a slow bedtime fade. The Wait Timer is a soft shrinking disc with a picture of what comes next: no numbers counting down, no alarm.
 
 DESIGNED TO BE SENSORY-SAFE
 • Dark, low-glare colours with soft pastels; no white screens, no flashing
@@ -43,10 +49,10 @@ DESIGNED TO BE SENSORY-SAFE
 • No timers that buzz, no scores, no "wrong" answers
 
 FOR PARENTS AND THERAPISTS
-Behind a grown-up check you can adjust motion speed, particle density, colour warmth and sound filtering; build your own routines with your own photos; set up several children; and see the "Calm & Focus Horizon": calm minutes each day, favourite calming modes and routine steps completed. Export a one-page PDF summary to share with an occupational therapist.
+Behind a grown-up check you can adjust motion, colour warmth and sound filtering; build routines and stories with your own photos; set up several children; and see calm minutes, favourite calming modes, routine steps, feelings and lessons finished. Export a PDF summary to share with an occupational therapist.
 
 PRIVATE BY DESIGN
-No sign-up needed. No ads, no analytics, no tracking. Photos you add stay on your device. An optional private cloud backup keeps settings, routines and progress safe if you change phones, and you can switch it off or delete everything at any time.
+No sign-up needed. No ads, no analytics, no tracking. Photos you add stay on your device. An optional private cloud backup keeps settings, routines, stories and progress safe if you change phones, and you can switch it off or delete everything at any time.
 
 Sensory SafeScape is an educational and calming tool. It is not a medical device and does not diagnose or treat any condition.
 
@@ -116,4 +122,14 @@ New: Breathing Buddy (breathe with Sammy: balloon, flower & candle, box), Bubble
 (slow, soft bubbles) and a Feelings Check-in that suggests a calming tool. Four more
 soothing sounds and five more ready-made routines (prayer time, nap, visiting family,
 playground, washing hands).
+```
+
+## Release notes — v1.2.0 (versionCode 3)
+
+```
+New: Learn with Sammy – eight short picture lessons about calm skills (feelings, calm-down
+tools, when plans change, asking for help and more), each with a gentle practice.
+New: Picture Stories – twelve calm stories for real situations like airplanes, a new
+school, vaccines, Eid and weddings. Grown-ups can write their own with photos.
+Progress and the therapist PDF now show lessons and stories.
 ```

@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "stories": [
+    {
+      "id": "airplane",
+      "title": "Going on an Airplane",
+      "icon": "airplane",
+      "pages": [
+        {"text": "Today I am going on an airplane.", "icon": "airplane"},
+        {"text": "We pack a bag with my things.", "icon": "suitcase"},
+        {"text": "At the airport there are many people. I stay close to my grown-up.", "icon": "people"},
+        {"text": "We wait at the gate. I can play quietly or look out of the window.", "icon": "waiting"},
+        {"text": "On the plane I sit in my seat and wear a seat belt.", "icon": "seat"},
+        {"text": "The plane can be noisy. I can wear my headphones.", "icon": "headphones"},
+        {"text": "When we land, we get off the plane. I did it!", "icon": "star"}
+      ]
+    },
+    {
+      "id": "new_school",
+      "title": "My New School",
+      "icon": "school",
+      "pages": [
+        {"text": "I am going to a new school.", "icon": "school"},
+        {"text": "I take my backpack with my things inside.", "icon": "backpack"},
+        {"text": "My new teacher says hello. She is happy to see me.", "icon": "teacher"},
+        {"text": "There are new children in my class. They are new to me too.", "icon": "people"},
+        {"text": "It can feel strange at first. That is okay.", "icon": "face_worried"},
+        {"text": "Each day it feels a little more like my school.", "icon": "face_happy"}
+      ]
+    },
+    {
+      "id": "fire_drill",
+      "title": "Fire Drill at School",
+      "icon": "bell",
+      "pages": [
+        {"text": "Sometimes my school has a fire drill.", "icon": "school"},
+        {"text": "A loud bell rings. The bell is loud so everyone can hear it.", "icon": "bell"},
+        {"text": "I can cover my ears if the bell is too loud.", "icon": "ear"},
+        {"text": "We walk outside in a line with our teacher.", "icon": "people"},
+        {"text": "We wait outside until it is time to go back.", "icon": "waiting"},
+        {"text": "A fire drill is practice. It helps us stay safe.", "icon": "star"}
+      ]
+    },
+    {
+      "id": "vaccine",
+      "title": "Getting a Vaccine",
+      "icon": "bandage",
+      "pages": [
+        {"text": "Today I am going to the clinic for a vaccine.", "icon": "hospital"},
+        {"text": "A vaccine helps my body stay healthy.", "icon": "muscle"},
+        {"text": "The nurse cleans a small spot on my arm. It feels cold.", "icon": "doctor"},
+        {"text": "I might feel a quick pinch. I can squeeze my grown-up's hand.", "icon": "hug"},
+        {"text": "I can look away and take a slow breath.", "icon": "wind"},
+        {"text": "Then a small plaster goes on my arm.", "icon": "bandage"},
+        {"text": "All done! It was quick.", "icon": "star"}
+      ]
+    },
+    {
+      "id": "guests",
+      "title": "Guests Are Coming",
+      "icon": "door",
+      "pages": [
+        {"text": "Today guests are coming to our home.", "icon": "home"},
+        {"text": "The doorbell may ring and people will come in.", "icon": "door"},
+        {"text": "I can say hello, or wave. Both are okay.", "icon": "wave"},
+        {"text": "There will be talking and maybe tea and food.", "icon": "tea"},
+        {"text": "If it gets too loud, I can go to my quiet place.", "icon": "quiet"},
+        {"text": "Later the guests say goodbye and go home.", "icon": "wave"}
+      ]
+    },
+    {
+      "id": "eid",
+      "title": "Eid with Family",
+      "icon": "moon",
+      "pages": [
+        {"text": "Eid is a special day.", "icon": "moon"},
+        {"text": "We wear new clothes.", "icon": "clothes"},
+        {"text": "Many family members come together. It can be busy and loud.", "icon": "family"},
+        {"text": "People may hug me or give me Eidi. I can say thank you.", "icon": "gift"},
+        {"text": "There is special food and sweets.", "icon": "sweets"},
+        {"text": "If I need a break, I can tell my grown-up and rest in a quiet room.", "icon": "quiet"},
+        {"text": "Eid is a happy day for our family.", "icon": "face_happy"}
+      ]
+    },
+    {
+      "id": "power_cut",
+      "title": "When the Lights Go Out",
+      "icon": "candle",
+      "pages": [
+        {"text": "Sometimes the electricity goes off.", "icon": "plug"},
+        {"text": "The lights and the fan stop. It may get dark or warm.", "icon": "moon"},
+        {"text": "My grown-up can turn on a torch or a lamp.", "icon": "torch"},
+        {"text": "I can stay close to my grown-up.", "icon": "hug"},
+        {"text": "We can wait together and talk or sing.", "icon": "music"},
+        {"text": "The electricity comes back on. The lights work again.", "icon": "sun"}
+      ]
+    },
+    {
+      "id": "long_trip",
+      "title": "A Long Car Trip",
+      "icon": "car",
+      "pages": [
+        {"text": "We are going on a long car trip.", "icon": "car"},
+        {"text": "I sit in my seat and wear my seat belt.", "icon": "seat"},
+        {"text": "The trip takes a long time. I can look at the map to see where we are.", "icon": "map"},
+        {"text": "I can bring a toy, a book or my headphones.", "icon": "book"},
+        {"text": "We stop for a break, food and the toilet.", "icon": "snack"},
+        {"text": "Then we get back in the car until we arrive.", "icon": "home"}
+      ]
+    },
+    {
+      "id": "new_baby",
+      "title": "A New Baby at Home",
+      "icon": "baby",
+      "pages": [
+        {"text": "A new baby is coming to our family.", "icon": "baby"},
+        {"text": "Babies sleep a lot and they cry when they need something.", "icon": "sleep"},
+        {"text": "Crying can be loud. I can wear headphones or go to a quiet place.", "icon": "headphones"},
+        {"text": "My grown-ups are busy with the baby, but they still love me.", "icon": "hug"},
+        {"text": "I can help, like bringing a bottle.", "icon": "bottle"},
+        {"text": "I am a big brother or a big sister now.", "icon": "star"}
+      ]
+    },
+    {
+      "id": "thunder",
+      "title": "When It Thunders",
+      "icon": "storm",
+      "pages": [
+        {"text": "Sometimes there is a storm.", "icon": "storm"},
+        {"text": "Thunder makes a loud boom. I am safe inside.", "icon": "loud"},
+        {"text": "I can cover my ears or wear headphones.", "icon": "headphones"},
+        {"text": "I can sit with my grown-up and hug my soft toy.", "icon": "play"},
+        {"text": "I can count slowly until the storm passes.", "icon": "numbers"},
+        {"text": "The storm ends and the sky is quiet again.", "icon": "sun"}
+      ]
+    },
+    {
+      "id": "wedding",
+      "title": "Going to a Wedding",
+      "icon": "party",
+      "pages": [
+        {"text": "We are going to a wedding.", "icon": "party"},
+        {"text": "There will be many people, bright lights and music.", "icon": "people"},
+        {"text": "It can be loud. I can wear my headphones.", "icon": "headphones"},
+        {"text": "We will eat food. Sometimes we wait a long time for dinner.", "icon": "meal"},
+        {"text": "If I feel tired or it is too much, I can tell my grown-up.", "icon": "speech"},
+        {"text": "We can go outside to a quieter place for a break.", "icon": "quiet"},
+        {"text": "Later we go home and rest.", "icon": "bed"}
+      ]
+    },
+    {
+      "id": "losing_game",
+      "title": "When I Don't Win",
+      "icon": "dice",
+      "pages": [
+        {"text": "I like playing games.", "icon": "dice"},
+        {"text": "Sometimes I win and sometimes someone else wins.", "icon": "people"},
+        {"text": "If I don't win, I might feel sad or cross. That is okay.", "icon": "face_sad"},
+        {"text": "I can take a slow breath.", "icon": "wind"},
+        {"text": "I can say \"good game\".", "icon": "handshake"},
+        {"text": "We can play again another time. Playing is fun.", "icon": "face_happy"}
+      ]
+    }
+  ]
+}

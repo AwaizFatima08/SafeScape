@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
+import 'core/learning.dart';
 import 'firebase_options.dart';
 import 'services/audio.dart';
 import 'services/cloud_sync.dart';
@@ -41,6 +42,7 @@ Future<void> main() async {
 
   final dir = await getApplicationSupportDirectory();
   final store = await AppStore.load(File('${dir.path}/safescape.json'), cloud);
+  final learning = await LearningContent.load();
 
   SoundService sound;
   try {
@@ -64,6 +66,7 @@ Future<void> main() async {
       cloudProvider.overrideWith((ref) => cloud),
       soundProvider.overrideWithValue(sound),
       speechProvider.overrideWithValue(speech),
+      learningProvider.overrideWithValue(learning),
     ],
     child: const SafeScapeApp(),
   ));
