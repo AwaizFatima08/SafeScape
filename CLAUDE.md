@@ -19,7 +19,7 @@ Calm sensory play (Flow Canvas, Soothing Sounds, Breathing Buddy, Bubble Pop, Fe
 - Firebase project: `safescape-homilabs` (Firestore + Auth: anonymous, email/password; Hosting keeps a mirror of the pages).
 - Local backup: `/mnt/storage/project_backups/safescape_backup/`
 - Google Drive: folder `1MQLHEGvfUOIOxbr9LbQuoM7z3pviZEFW` (rclone remote `gdrive`)
-- GitHub (**public**): `git@github.com:AwaizFatima08/safescape.git`
+- GitHub (**public**): `git@github.com:AwaizFatima08/SafeScape.git`
 - Backup: `bash scripts/backup.sh`. Commit first; the GitHub layer refuses to push with untracked or uncommitted files. `.secrets/` (upload keystore + passwords) only goes to the local and Drive layers.
 
 ## Code map

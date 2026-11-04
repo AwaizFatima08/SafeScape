@@ -24,7 +24,7 @@ PROJECT_DIR="/mnt/storage/projects/safescape"
 LOCAL_BACKUP_ROOT="/mnt/storage/project_backups/safescape_backup"
 GDRIVE_REMOTE="gdrive"
 GDRIVE_FOLDER_ID="1MQLHEGvfUOIOxbr9LbQuoM7z3pviZEFW"
-GIT_REMOTE_URL="git@github.com:AwaizFatima08/safescape.git"
+GIT_REMOTE_URL="git@github.com:AwaizFatima08/SafeScape.git"
 KEEP_LOCAL_BACKUPS=10
 
 TIMESTAMP="$(date +%Y-%m-%d_%H-%M-%S)"
