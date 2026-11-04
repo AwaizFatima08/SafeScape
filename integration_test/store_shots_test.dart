@@ -31,8 +31,11 @@ Future<void> tapKey(WidgetTester t, String key, {int settleMs = 1200}) async {
   final f = find.byKey(ValueKey(key));
   await wait(t, 300);
   if (f.evaluate().isEmpty) {
-    await t.scrollUntilVisible(f, 250,
-        scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last);
+    await t.scrollUntilVisible(
+      f,
+      250,
+      scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last,
+    );
   }
   // Only scroll when the target is off-screen: ensureVisible also moves
   // horizontal ancestors (e.g. a TabBarView) and can switch tabs.
@@ -66,8 +69,8 @@ void main() {
 
     await t.enterText(find.byKey(const ValueKey('alias_field')), 'Maya');
     await t.testTextInput.receiveAction(TextInputAction.done);
-      FocusManager.instance.primaryFocus?.unfocus();
-      await wait(t, 1500); // let the keyboard close
+    FocusManager.instance.primaryFocus?.unfocus();
+    await wait(t, 1500); // let the keyboard close
     await wait(t, 800);
     await shot(t, '01_welcome');
     await tapKey(t, 'enter_button', settleMs: 2500);
@@ -79,13 +82,63 @@ void main() {
     const daily = [12, 8, 15, 6, 18, 10, 14];
     for (var d = 0; d < 7; d++) {
       final day = now.subtract(Duration(days: 6 - d));
-      store.logSession(SensorySession(id: newId('s'), childId: child.id, mode: 'flow_canvas',
-          start: day, durationSeconds: daily[d] * 40, palette: d.isEven ? 'lavender' : 'mint', touchRhythm: 'slow_rhythmic'));
-      store.logSession(SensorySession(id: newId('s'), childId: child.id, mode: 'sounds',
-          start: day, durationSeconds: daily[d] * 20, sound: d % 3 == 0 ? 'rain' : 'ocean'));
-      store.logSession(SensorySession(id: newId('s'), childId: child.id, mode: 'routine', start: day,
-          durationSeconds: 600, routineId: 'x', routineTitle: 'Bedtime Routine', stepsDone: d == 2 ? 3 : 5, stepsTotal: 5));
+      store.logSession(
+        SensorySession(
+          id: newId('s'),
+          childId: child.id,
+          mode: 'flow_canvas',
+          start: day,
+          durationSeconds: daily[d] * 40,
+          palette: d.isEven ? 'lavender' : 'mint',
+          touchRhythm: 'slow_rhythmic',
+        ),
+      );
+      store.logSession(
+        SensorySession(
+          id: newId('s'),
+          childId: child.id,
+          mode: 'sounds',
+          start: day,
+          durationSeconds: daily[d] * 20,
+          sound: d % 3 == 0 ? 'rain' : 'ocean',
+        ),
+      );
+      store.logSession(
+        SensorySession(
+          id: newId('s'),
+          childId: child.id,
+          mode: 'routine',
+          start: day,
+          durationSeconds: 600,
+          routineId: 'x',
+          routineTitle: 'Bedtime Routine',
+          stepsDone: d == 2 ? 3 : 5,
+          stepsTotal: 5,
+        ),
+      );
     }
+    // v1.2: a few lessons and stories in the history, and one chapter finished.
+    for (final (d, mode, id, title, total) in [
+      (1, 'lesson', 'calm_tools', 'My Calm-Down Tools', 7),
+      (2, 'story', 'airplane', 'Going on an Airplane', 7),
+      (4, 'lesson', 'body_talks', 'My Body Talks', 7),
+      (5, 'story', 'eid', 'Eid with Family', 7),
+    ]) {
+      store.logSession(
+        SensorySession(
+          id: newId('s'),
+          childId: child.id,
+          mode: mode,
+          start: now.subtract(Duration(days: d)),
+          durationSeconds: 240,
+          sound: id,
+          routineTitle: title,
+          stepsDone: total,
+          stepsTotal: total,
+        ),
+      );
+    }
+    store.completeLesson(child, 'body_talks');
     await shot(t, '02_hub');
 
     await tapKey(t, 'card_canvas');
@@ -132,6 +185,29 @@ void main() {
     await tapKey(t, 'wait_start');
     await wait(t, 8000);
     await shot(t, '07_wait');
+    await tapKey(t, 'home');
+
+    // v1.2: Learn with Sammy and Picture Stories.
+    await tapKey(t, 'card_lessons');
+    await shot(t, '11_lessons');
+    await tapKey(t, 'chapter_calm_tools');
+    await tapKey(t, 'lesson_next', settleMs: 900);
+    await shot(t, '12_lesson_card');
+    await tapKey(t, 'home');
+    await tapKey(t, 'card_lessons');
+    await tapKey(t, 'chapter_too_loud');
+    for (var i = 0; i < 6; i++) {
+      await tapKey(t, 'lesson_next', settleMs: 700);
+    }
+    await tapKey(t, 'choose_0');
+    await shot(t, '13_practice');
+    await tapKey(t, 'home');
+    await tapKey(t, 'card_stories');
+    await shot(t, '14_stories');
+    await tapKey(t, 'story_eid');
+    await tapKey(t, 'story_next', settleMs: 900);
+    await tapKey(t, 'story_next', settleMs: 900);
+    await shot(t, '15_story');
     await tapKey(t, 'home');
 
     await tapKey(t, 'parent_lock');

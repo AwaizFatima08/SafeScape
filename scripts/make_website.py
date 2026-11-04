@@ -13,7 +13,7 @@ OUT = ROOT / "firebase/hosting"
 SITE = "https://safescape.homilabs.org"
 EMAIL = "homilabs.smc@gmail.com"
 PLAY = "https://play.google.com/store/apps/details?id=com.homilabs.safescape"
-UPDATED = "28 September 2026"
+UPDATED = "28 September 2026"  # legal pages; content unchanged in v1.2
 
 CSS = """:root {
   --bg: #12131C; --card: #1B1D2A; --raise: #262939; --text: #E8E6F0; --dim: #A9A7BA;
@@ -161,6 +161,17 @@ INDEX = f"""<main>
         <h3>Soothing Sounds</h3><p>Warm hum, soft rain, ocean waves and a marimba lullaby, all filtered to remove sharp high pitches, with a slow fade-out for bedtime.</p></div>
       <div class="card"><img class="shot" src="images/wait.webp" alt="" loading="lazy" width="360" height="749">
         <h3>Wait Timer</h3><p>A soft disc slowly shrinks to show "a few more minutes", with a picture of what comes next. No numbers counting down and no alarm, just one low note.</p></div>
+    </div>
+  </section>
+
+  <section id="learn">
+    <h2>New: Learn with Sammy and Picture Stories</h2>
+    <p class="sub">Calm skills and real-life preparation, in short picture pages read aloud. No scores and no wrong answers.</p>
+    <div class="two">
+      <div class="card"><img class="shot" src="images/lessons.webp" alt="" loading="lazy" width="360" height="749">
+        <h3>Learn with Sammy</h3><p>Eight short lessons: My Body Talks, Feelings Have Names, My Calm-Down Tools, Too Loud Too Bright, When Plans Change, Asking for Help, Waiting My Turn and Playing Together. Each ends with a gentle practice: slow breaths, squeeze-and-let-go, a 5-4-3 noticing game or choosing what helps.</p></div>
+      <div class="card"><img class="shot" src="images/story.webp" alt="" loading="lazy" width="360" height="749">
+        <h3>Picture Stories</h3><p>Twelve calm, first-person stories for real situations: an airplane, a new school, a fire drill, a vaccine, guests, Eid, a power cut, a long car trip, a new baby, thunder, a wedding and losing a game. Grown-ups can write their own, with photos of the real place.</p></div>
     </div>
   </section>
 
@@ -336,8 +347,37 @@ DELETE = f"""<main class="wrap narrow doc">
 </main>"""
 
 
+SHOTS = ROOT / "store-assets/screenshots-play/phone-v12"
+# web image name -> store screenshot (made by take_screenshots.sh + make_store_assets.py)
+WEB_IMAGES = {"hub": "02_hub", "canvas": "03_canvas", "routine": "05_routine", "sounds": "06_sounds",
+              "wait": "07_wait", "progress": "08_progress", "lessons": "11_lessons", "story": "15_story"}
+
+
+def web_images():
+    """360 px WebP versions of the store screenshots (2:1 padding and the
+    navigation bar cropped off), so the site always shows the current app."""
+    from PIL import Image
+    if not SHOTS.exists():
+        print("no", SHOTS, "- keeping the existing images/")
+        return
+    (OUT / "images").mkdir(exist_ok=True)
+    for web, shot in WEB_IMAGES.items():
+        im = Image.open(SHOTS / f"{shot}.png").convert("RGB")
+        w, h = im.size
+        pad = (w - round(h * 0.45)) // 2 if w > h * 0.45 else 0
+        im = im.crop((pad, 0, w - pad, round(h * 0.94)))
+        im = im.resize((360, round(360 * im.height / im.width)), Image.LANCZOS)
+        im = im.crop((0, 0, 360, min(im.height, 749)))
+        if im.height < 749:
+            canvas = Image.new("RGB", (360, 749), (18, 19, 28))
+            canvas.paste(im, (0, 0))
+            im = canvas
+        im.save(OUT / "images" / f"{web}.webp", "WEBP", quality=82, method=6)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    web_images()
     (OUT / "style.css").write_text(CSS)
     page("index.html", "Sensory SafeScape: calm sensory play and visual routines for kids",
          "Calm sensory play and picture routines for autistic and sensory-sensitive children aged 2 to 10. Free, no ads, no tracking, no sign-up.",

@@ -3,7 +3,9 @@
 # releases/SafeScape-v<ver>-package/ and a zip next to it.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-VER="1.0.0-1"
+# Version from pubspec.yaml, e.g. 1.2.0+3 -> 1.2.0-3
+VER="$(grep -m1 '^version:' pubspec.yaml | awk '{print $2}' | tr '+' '-')"
+NAME="${VER%-*}"
 SRC="releases/v$VER"
 OUT="releases/SafeScape-v$VER-package"
 rm -rf "$OUT" "$OUT.zip"
@@ -13,23 +15,27 @@ cp "$SRC/safescape-$VER.aab" "$OUT/1_upload_to_play_console/"
 python3 scripts/make_website.py > /dev/null
 cp -r firebase/hosting/. "$OUT/2_website_safescape.homilabs.org/"
 cp store-assets/icon-512.png store-assets/feature-graphic-1024x500.png "$OUT/3_store_listing/"
-cp store-assets/screenshots-play/phone/*.png "$OUT/3_store_listing/phone_screenshots/"
+# Play allows 8 phone screenshots: the captioned set (make_captioned.py).
+cp store-assets/captioned/*.jpg "$OUT/3_store_listing/phone_screenshots/"
 cp docs/play-console-listing-kit.md "$OUT/3_store_listing/play-console-answers.md"
 cp "$SRC/safescape-$VER.apk" "$OUT/4_test_apk_for_phones/"
 
 # Copy-paste text for the store listing.
-python3 - "$OUT/3_store_listing/store-listing-text.txt" <<'PY'
+python3 - "$OUT/3_store_listing/store-listing-text.txt" "$NAME" <<'PY'
 import re, sys
 kit = open("docs/play-console-listing-kit.md").read()
 short = re.search(r"## Short description \(80\)\n(.+?)\n", kit).group(1).strip()
 full = re.search(r"## Full description \(≤4000\)\n(.+?)\n## Graphics", kit, re.S).group(1).strip()
-notes = re.search(r"## Release notes \(v1.0.0\)\n(.+?)\n", kit).group(1).strip()
+name = sys.argv[2]
+m = re.search(r"## Release notes — v" + re.escape(name) + r" \(versionCode \d+\)\n\n```\n(.+?)```", kit, re.S)
+notes = m.group(1).strip() if m else re.search(r"## Release notes \(v1.0.0\)\n(.+?)\n", kit).group(1).strip()
+assert len(notes) <= 500, len(notes)
 assert len(short) <= 80 and len(full) <= 4000, (len(short), len(full))
 open(sys.argv[1], "w").write(
     "APP NAME (30 max)\nSensory SafeScape\n\n"
     f"SHORT DESCRIPTION ({len(short)}/80)\n{short}\n\n"
     f"FULL DESCRIPTION ({len(full)}/4000)\n{full}\n\n"
-    f"RELEASE NOTES (v1.0.0)\n{notes}\n\n"
+    f"RELEASE NOTES / WHAT'S NEW (v{name}, {len(notes)}/500)\n{notes}\n\n"
     "WEBSITE\nhttps://safescape.homilabs.org\n\nEMAIL\nhomilabs.smc@gmail.com\n\n"
     "PRIVACY POLICY URL\nhttps://safescape.homilabs.org/privacy.html\n\n"
     "ACCOUNT DELETION URL\nhttps://safescape.homilabs.org/delete-account.html\n\n"
@@ -38,11 +44,11 @@ print(f"listing text: short {len(short)}/80, full {len(full)}/4000")
 PY
 
 cat > "$OUT/README.txt" <<'TXT'
-SENSORY SAFESCAPE v1.0.0 (versionCode 1) - RELEASE PACKAGE
+SENSORY SAFESCAPE - RELEASE PACKAGE (version in the file names)
 Package name: com.homilabs.safescape
 
 1_upload_to_play_console/
-   safescape-1.0.0-1.aab  -> Play Console > Test and release > (Internal testing first) > Create release > Upload.
+   safescape-<version>.aab -> Play Console > Test and release > (Internal testing first) > Create release > Upload.
    Signed with the SafeScape upload key. Let Google manage the app signing key (Play App Signing).
 
 2_website_safescape.homilabs.org/
@@ -60,10 +66,10 @@ Package name: com.homilabs.safescape
    play-console-answers.md  -> App content answers: Data safety, target audience, content rating, Families policy
    icon-512.png             -> App icon (512 x 512)
    feature-graphic-1024x500.png -> Feature graphic
-   phone_screenshots/       -> 10 phone screenshots (800 x 1600, within Play's 2:1 limit), upload in order 01..10
+   phone_screenshots/       -> 8 captioned phone screenshots (1080 x 1920, English + Urdu headline), upload in order 01..08
 
 4_test_apk_for_phones/
-   safescape-1.0.0-1.apk    -> for installing directly on test phones (not for Play Console)
+   safescape-<version>.apk -> for installing directly on test phones (not for Play Console)
 
 AFTER THE FIRST UPLOAD
    1. Play Console > Setup > App signing: copy the App signing key SHA-1 and SHA-256.
