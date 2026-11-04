@@ -32,6 +32,15 @@ After testing, all test accounts and test data were removed from Firebase (0 acc
 
 Release APK permissions: `INTERNET`, `ACCESS_NETWORK_STATE`, plus two added by Google Play services (`READ_GSERVICES`, a non-exported receiver permission). No `AD_ID`, microphone, camera, storage or location.
 
+## Results for v1.2.0 (4–5 Nov 2026)
+- Host: 79 unit + widget tests pass (incl. Galaxy A12 and OPPO CPH2743 no-truncation checks); analyzer clean.
+- Emulator (`safescape_api35`, swangle_indirect): app_flow and learning_flow pass every UI step; both stop at
+  "silent anonymous sign-in" (Firebase times out from the emulator's network). Store screenshots: 15/15.
+- OPPO CPH2743 (Android 16, wireless debugging), release APK 1.2.0-3: 3,000 monkey events, no crash, app alive;
+  cold start ~3.1 s (`WaitTime`; ColorOS reports no `TotalTime`). Integration tests did **not** run: the test
+  runner could not reach the debug app's VM service over wireless adb ("Connection closed before full header").
+  Retry with a USB cable. The Firebase sign-in path is therefore still unverified on a real phone for v1.2.
+
 ## Emulator notes (this NAS: 4 CPU cores, no GPU)
 - Start with `-gpu swangle_indirect -memory 3072`; use `-cores 2` if you will build at the same time. Running Gradle or the host test suite alongside a 4-core emulator trips the emulator's hang watchdog ("QEMU2 main loop … No response") and it exits. That is an emulator limit, not an app fault.
 - The on-screen keyboard shrinks the onboarding list on real devices, so device tests dismiss it before tapping further down.
