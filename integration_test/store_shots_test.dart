@@ -26,7 +26,9 @@ Future<void> shot(WidgetTester t, String name) async {
   await wait(t, 3000);
   // ignore: avoid_print
   print('SHOT:$name');
-  await wait(t, 5000);
+  // The capture (close dialogs, screencap, dialog check) can lag several
+  // seconds behind this line on the emulator: hold the screen long enough.
+  await wait(t, 9000);
 }
 
 Future<void> tapKey(WidgetTester t, String key, {int settleMs = 1200}) async {
