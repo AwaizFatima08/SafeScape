@@ -2,6 +2,7 @@
 # One CPU-lane job (run it through jobq): build the signed release, then test
 # on a real phone and leave the release installed.
 #   jobq run --name safescape-release -- bash scripts/release_and_device.sh <adb-serial> [--replace-installed]
+# SKIP_BUILD=1 reuses a release already built from the current commit.
 # --replace-installed uninstalls an existing (e.g. Play-signed) SafeScape first:
 # that ERASES its on-phone data, so only pass it with the owner's OK.
 set -uo pipefail
@@ -18,6 +19,9 @@ PKG=com.homilabs.safescape
 avail=$(free -g | awk '/Mem:/{print $7}')
 if [ "$avail" -lt 4 ]; then echo "NOT STARTED: only ${avail} GiB RAM available (need 4)."; exit 2; fi
 
+if [ "${SKIP_BUILD:-0}" = "1" ] && [ -f "$REL/safescape-$VER.apk" ] && grep -q "commit: $(git rev-parse --short HEAD)" "$REL/BUILD_INFO" 2>/dev/null; then
+  echo "=== reusing the release built from this commit"; cat "$REL/BUILD_INFO"
+else
 echo "=== release build $VER $(date +%T)"
 flutter build appbundle --release > "$OUT/build.log" 2>&1 && flutter build apk --release >> "$OUT/build.log" 2>&1 || {
   echo "BUILD FAILED"; tail -20 "$OUT/build.log"; (cd android && ./gradlew --stop > /dev/null 2>&1); exit 1; }
@@ -27,6 +31,7 @@ cp build/app/outputs/flutter-apk/app-release.apk "$REL/safescape-$VER.apk"
 { echo "version: $VER"; echo "commit: $(git rev-parse --short HEAD)"; echo "built: $(date -Is)";
   "$HOME/Android/Sdk/build-tools/36.0.0/apksigner" verify --print-certs "$REL/safescape-$VER.apk" | grep -m1 SHA-1; } > "$REL/BUILD_INFO"
 cat "$REL/BUILD_INFO"
+fi
 
 if ! adb -s "$DEV" get-state > /dev/null 2>&1; then
   echo "PHONE $DEV NOT CONNECTED: release built, device tests skipped."
