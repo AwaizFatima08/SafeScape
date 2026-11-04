@@ -74,12 +74,16 @@ class JustAudioSoundService implements SoundService {
     _muted = muted;
     _master = volume;
     if (_fadeTimer == null && _loopName != null) {
-      _loop.setVolume(_loopTarget);
+      _vol(_loop, _loopTarget);
     }
     for (final p in _sfx) {
-      p.setVolume(_muted ? 0 : _master);
+      _vol(p, _muted ? 0 : _master);
     }
   }
+
+  /// Sets a volume without letting an interrupted player (a new sound
+  /// loading mid-fade) throw an unhandled error.
+  void _vol(AudioPlayer p, double v) => p.setVolume(v).catchError((Object _) {});
 
   Future<void> _fadeTo(double target, Duration d) {
     _fadeTimer?.cancel();
@@ -90,7 +94,7 @@ class JustAudioSoundService implements SoundService {
     var i = 0;
     _fadeTimer = Timer.periodic(tick, (t) {
       i++;
-      _loop.setVolume(start + (target - start) * (i / steps));
+      _vol(_loop, start + (target - start) * (i / steps));
       if (i >= steps) {
         t.cancel();
         _fadeTimer = null;
@@ -138,7 +142,7 @@ class JustAudioSoundService implements SoundService {
   @override
   void setLoopLevel(double level) {
     _loopLevel = level.clamp(0.0, 1.0);
-    if (_fadeTimer == null && _loopName != null) _loop.setVolume(_loopTarget);
+    if (_fadeTimer == null && _loopName != null) _vol(_loop, _loopTarget);
   }
 
   @override

@@ -28,8 +28,11 @@ Future<void> tapKey(WidgetTester t, String key, {int settleMs = 1200}) async {
   final f = find.byKey(ValueKey(key));
   await wait(t, 300);
   if (f.evaluate().isEmpty) {
+    // Lazily built item: back to the top of the list, then scroll down to it.
     final list = find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last;
-    await t.scrollUntilVisible(f, 250, scrollable: list);
+    t.state<ScrollableState>(list).position.jumpTo(0);
+    await wait(t, 300);
+    if (f.evaluate().isEmpty) await t.scrollUntilVisible(f, 250, scrollable: list);
   }
   final lists = find.ancestor(of: f, matching: find.byType(Scrollable));
   final r = t.getRect(f);
@@ -106,8 +109,7 @@ void main() {
     await wait(t, 1500);
     await tapKey(t, 'tab_stories');
     await tapKey(t, 'add_story');
-    await t.tap(find.byKey(const ValueKey('story_copy_wedding')));
-    await wait(t, 1500);
+    await tapKey(t, 'story_copy_wedding', settleMs: 1500); // far down the sheet: scrolls to it
     await tapKey(t, 'save_story', settleMs: 2000);
     expect(store.storiesFor(childId).single.title, 'Going to a Wedding');
 

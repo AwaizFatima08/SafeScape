@@ -25,8 +25,11 @@ Future<void> tapKey(WidgetTester t, String key, {int settleMs = 1200}) async {
   final f = find.byKey(ValueKey(key));
   await wait(t, 300);
   if (f.evaluate().isEmpty) {
-    await t.scrollUntilVisible(f, 250,
-        scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last);
+    // Lazily built item: back to the top of the list, then scroll down to it.
+    final list = find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).last;
+    t.state<ScrollableState>(list).position.jumpTo(0);
+    await wait(t, 300);
+    if (f.evaluate().isEmpty) await t.scrollUntilVisible(f, 250, scrollable: list);
   }
   // Only scroll when the target is off-screen: ensureVisible also moves
   // horizontal ancestors (e.g. a TabBarView) and can switch tabs.
