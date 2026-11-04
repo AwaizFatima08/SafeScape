@@ -36,7 +36,7 @@ Release APK permissions: `INTERNET`, `ACCESS_NETWORK_STATE`, plus two added by G
 - Host: 79 unit + widget tests pass (incl. Galaxy A12 and OPPO CPH2743 no-truncation checks); analyzer clean.
 - Emulator (`safescape_api35`, swangle_indirect): app_flow and learning_flow pass every UI step; both stop at
   "silent anonymous sign-in" (Firebase times out from the emulator's network). Store screenshots: 15/15.
-- OPPO CPH2743 (Android 16, wireless debugging), release APK 1.2.0-3: 3,000 monkey events, no crash, app alive;
+- OPPO CPH2743 (wireless debugging), release APK 1.2.0-3: 3,000 monkey events, no crash, app alive;
   cold start ~3.1 s (`WaitTime`; ColorOS reports no `TotalTime`). Integration tests did **not** run: the test
   runner could not reach the debug app's VM service over wireless adb ("Connection closed before full header").
   Retry with a USB cable. The Firebase sign-in path is therefore still unverified on a real phone for v1.2.
