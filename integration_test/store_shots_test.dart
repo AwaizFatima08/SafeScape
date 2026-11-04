@@ -21,7 +21,9 @@ Future<void> wait(WidgetTester t, int ms) async {
 }
 
 Future<void> shot(WidgetTester t, String name) async {
-  await wait(t, 1200);
+  // Pictograms decode asynchronously; on a software-rendered emulator that
+  // can take a couple of seconds.
+  await wait(t, 3000);
   // ignore: avoid_print
   print('SHOT:$name');
   await wait(t, 5000);

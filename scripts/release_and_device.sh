@@ -2,7 +2,7 @@
 # One CPU-lane job (run it through jobq): build the signed release, then test
 # on a real phone and leave the release installed.
 #   jobq run --name safescape-release -- bash scripts/release_and_device.sh <adb-serial> [--replace-installed]
-# SKIP_BUILD=1 reuses a release already built from the current commit.
+# SKIP_BUILD=1 reuses the release in releases/ if no app source changed since it was built.
 # --replace-installed uninstalls an existing (e.g. Play-signed) SafeScape first:
 # that ERASES its on-phone data, so only pass it with the owner's OK.
 set -uo pipefail
@@ -19,7 +19,9 @@ PKG=com.homilabs.safescape
 avail=$(free -g | awk '/Mem:/{print $7}')
 if [ "$avail" -lt 4 ]; then echo "NOT STARTED: only ${avail} GiB RAM available (need 4)."; exit 2; fi
 
-if [ "${SKIP_BUILD:-0}" = "1" ] && [ -f "$REL/safescape-$VER.apk" ] && grep -q "commit: $(git rev-parse --short HEAD)" "$REL/BUILD_INFO" 2>/dev/null; then
+BUILT="$(awk '/^commit:/{print $2}' "$REL/BUILD_INFO" 2>/dev/null)"
+if [ "${SKIP_BUILD:-0}" = "1" ] && [ -f "$REL/safescape-$VER.apk" ] && [ -n "$BUILT" ] &&
+   git diff --quiet "$BUILT" HEAD -- lib assets android pubspec.yaml pubspec.lock && git diff --quiet -- lib assets android pubspec.yaml; then
   echo "=== reusing the release built from this commit"; cat "$REL/BUILD_INFO"
 else
 echo "=== release build $VER $(date +%T)"

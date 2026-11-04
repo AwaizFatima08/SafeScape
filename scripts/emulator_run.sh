@@ -2,7 +2,7 @@
 # One CPU-lane job (run it through jobq): boot SafeScape's own emulator, run the
 # on-device tests and capture store screenshots, then shut everything down.
 #   jobq run --name safescape-emulator -- bash scripts/emulator_run.sh [out-dir]
-# Follows ~/.claude/heavy-jobs.md: own AVD and port, 2 GB / 2 cores,
+# Follows ~/.claude/heavy-jobs.md: own AVD and port, 3 GB / 3 cores (CLAUDE.md),
 # swangle_indirect (no GPU X server yet), cleanup straight after.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -21,7 +21,7 @@ if [ "$avail" -lt 6 ]; then
   exit 2
 fi
 
-"$HOME/Android/Sdk/emulator/emulator" -avd safescape_api35 -port "$PORT" -no-window -memory 2048 -cores 2 \
+"$HOME/Android/Sdk/emulator/emulator" -avd safescape_api35 -port "$PORT" -no-window -memory 3072 -cores 3 \
   -no-snapshot-save -no-audio -no-boot-anim -gpu swangle_indirect > "$OUT/emulator.log" 2>&1 &
 EMU=$!
 cleanup() {
@@ -41,7 +41,9 @@ sleep 20
 echo "graphics: $(adb -s "$DEV" shell dumpsys SurfaceFlinger | grep -m1 GLES)"
 
 result=0
-for t in app_flow_test learning_flow_test; do
+# SHOTS_ONLY=1 skips the flow tests and only captures the screenshots.
+[ "${SHOTS_ONLY:-0}" = "1" ] && TESTS="" || TESTS="app_flow_test learning_flow_test"
+for t in $TESTS; do
   echo "=== $t $(date +%T)"
   timeout 30m flutter test "integration_test/$t.dart" -d "$DEV" > "$OUT/$t.log" 2>&1
   grep -E "All tests passed|Some tests failed|CLEANED" "$OUT/$t.log" | tail -2
