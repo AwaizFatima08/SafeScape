@@ -15,6 +15,8 @@ REL="releases/v$VER"
 OUT="build/device-run"
 mkdir -p "$OUT" "$REL"
 PKG=com.homilabs.safescape
+# Wireless adb can drop mid-job: no adb call may hang the CPU lane for long.
+adb() { local t=120; case "$*" in *" install "*) t=600 ;; *" monkey "*) t=1200 ;; esac; timeout "$t" command adb "$@"; }
 
 avail=$(free -g | awk '/Mem:/{print $7}')
 if [ "$avail" -lt 4 ]; then echo "NOT STARTED: only ${avail} GiB RAM available (need 4)."; exit 2; fi
