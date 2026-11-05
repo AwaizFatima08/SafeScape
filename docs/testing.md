@@ -36,10 +36,12 @@ Release APK permissions: `INTERNET`, `ACCESS_NETWORK_STATE`, plus two added by G
 - Host: 79 unit + widget tests pass (incl. Galaxy A12 and OPPO CPH2743 no-truncation checks); analyzer clean.
 - Emulator (`safescape_api35`, swangle_indirect): app_flow and learning_flow pass every UI step; both stop at
   "silent anonymous sign-in" (Firebase times out from the emulator's network). Store screenshots: 15/15.
-- OPPO CPH2743 (wireless debugging), release APK 1.2.0-3: 3,000 monkey events, no crash, app alive;
-  cold start ~3.1 s (`WaitTime`; ColorOS reports no `TotalTime`). Integration tests did **not** run: the test
-  runner could not reach the debug app's VM service over wireless adb ("Connection closed before full header").
-  Retry with a USB cable. The Firebase sign-in path is therefore still unverified on a real phone for v1.2.
+- OPPO CPH2743 (Android 16, wireless debugging), 5 Nov: the first real-phone run found a 19 px overflow in the
+  grown-ups gate keypad at 320 dp (fixed; the OPPO host profile now opens the gate), so versionCode 3 was replaced
+  by **1.2.0+4**. On 1.2.0+4: app_flow **passed** and learning_flow **passed** (both deleted their own Firebase test
+  account); release APK: 3,000 monkey events, no crash; cold start 567–618 ms (`TotalTime`).
+  Wireless adb sometimes drops the test runner's debug connection ("Connection closed before full header",
+  "log reader stopped"): that is the transport, not the app — rerun the test.
 
 ## Emulator notes (this NAS: 4 CPU cores, no GPU)
 - Start with `-gpu swangle_indirect -memory 3072`; use `-cores 2` if you will build at the same time. Running Gradle or the host test suite alongside a 4-core emulator trips the emulator's hang watchdog ("QEMU2 main loop … No response") and it exits. That is an emulator limit, not an app fault.
