@@ -124,7 +124,7 @@ soothing sounds and five more ready-made routines (prayer time, nap, visiting fa
 playground, washing hands).
 ```
 
-## Release notes — v1.2.0 (versionCode 3)
+## Release notes — v1.2.0 (versionCode 4)
 
 ```
 New: Learn with Sammy – eight short picture lessons about calm skills (feelings, calm-down

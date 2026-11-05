@@ -162,14 +162,16 @@ class _ParentGateDialogState extends State<_ParentGateDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // Keys shrink on narrow phones (the dialog is only ~197 dp wide at 320 dp).
+    final keyW = ((MediaQuery.sizeOf(context).width - 132) / 3 - 8).clamp(48.0, 64.0);
     Widget key(String k) => Padding(
       padding: const EdgeInsets.all(4),
       child: SizedBox(
-        width: 64,
+        width: keyW,
         height: 56,
         child: FilledButton.tonal(
           key: ValueKey('gate_$k'),
-          style: FilledButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(56, 52)),
+          style: FilledButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(48, 52)),
           onPressed: () => _press(k),
           child: k == 'del'
               ? const Icon(Icons.backspace_outlined, semanticLabel: 'Delete')
@@ -200,7 +202,7 @@ class _ParentGateDialogState extends State<_ParentGateDialog> {
             for (final row in const [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['', '0', 'del']])
               Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [for (final k in row) k.isEmpty ? const SizedBox(width: 72) : key(k)],
+                children: [for (final k in row) k.isEmpty ? SizedBox(width: keyW + 8) : key(k)],
               ),
           ],
         ),

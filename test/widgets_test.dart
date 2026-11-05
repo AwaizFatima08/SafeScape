@@ -267,6 +267,12 @@ void main() {
       }
       await tapKey(t, 'feel_sad');
       noTruncation('feelings answer');
+      await tapKey(t, 'home');
+      await tapKey(t, 'parent_lock');
+      noTruncation('grown-ups gate');
+      for (final k in ['1', '3', 'del']) {
+        expect(t.getSize(find.byKey(ValueKey('gate_$k'))).width, greaterThanOrEqualTo(48), reason: k);
+      }
     });
   }
 
